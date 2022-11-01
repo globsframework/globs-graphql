@@ -1,5 +1,6 @@
 package org.globsframework.graphql;
 
+import com.mysql.cj.log.Log;
 import org.globsframework.functional.FunctionalKey;
 import org.globsframework.functional.FunctionalKeyBuilder;
 import org.globsframework.graphql.model.GQLPageInfo;
@@ -240,6 +241,11 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
                             final Set<GlobType> globTypes = current.stream().map(Node::getType).collect(Collectors.toSet());
                             for (GlobType globType : globTypes) {
                                 final GQLKeyExtractor<C> gqlKeyExtractor = gqlKeyExtractors.get(globType);
+                                if (gqlKeyExtractor == null) {
+                                    final String msg = "No extractor found for " + globType.getName() + " got " + gqlKeyExtractors.keySet().stream().map(GlobType::getName).collect(Collectors.toSet());
+                                    LOGGER.error(msg);
+                                    throw new RuntimeException(msg);
+                                }
                                 MapOfMaps<FunctionalKeyBuilder, FunctionalKey, List<Node>> call = new MapOfMaps<>();
                                 gqlKeyExtractor.extract(gqlField, callContext,
                                         current.stream().map(node -> new OnExtract(node.data, key -> {
@@ -253,6 +259,11 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
                                 for (Map.Entry<FunctionalKeyBuilder, Map<FunctionalKey, List<Node>>> functionalKeyBuilderMapEntry : call.entry()) {
                                     List<Node> newNode = new ArrayList<>();
                                     GQLGlobFetcher<C> gqlGlobFetcher = fetchers.get(gqlField.gqlGlobType().type, functionalKeyBuilderMapEntry.getKey());
+                                    if (gqlGlobFetcher == null) {
+                                        final String s = "Can not find fetcher for " + gqlField.gqlGlobType().type;
+                                        LOGGER.error(s);
+                                        throw new RuntimeException(s);
+                                    }
                                     gqlGlobFetcher.load(gqlField.gqlGlobType(), callContext, functionalKeyBuilderMapEntry.getValue().entrySet()
                                                     .stream().map(functionalKeyListEntry -> new OnKey(functionalKeyListEntry.getKey(), data -> {
                                                         for (Node node : functionalKeyListEntry.getValue()) {
@@ -298,36 +309,38 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
                 final Optional<IntegerField> total = gqlField.gqlGlobType().outputType.findOptField("totalCount").map(Field::asIntegerField);
                 final Optional<GlobField> pageInfoField = gqlField.gqlGlobType().outputType.findOptField("pageInfo").map(Field::asGlobField);
                 final Optional<PageInfoField> pageInfoType = pageInfoField.map(t -> extract(t.getTargetType()));
-                final GlobArrayField edgesField = gqlField.gqlGlobType().outputType.getField("edges").asGlobArrayField();
-                final GlobType edgesType = edgesField.getTargetType();
-                final Optional<GlobField> edgeNode = edgesType.findOptField("node").map(Field::asGlobField);
-                final Optional<StringField> edgeCursor = edgesType.findOptField("cursor").map(Field::asStringField);
+                final Optional<GlobArrayField> edgesField = gqlField.gqlGlobType().outputType.findOptField("edges").map(Field::asGlobArrayField);
+                final Optional<GlobType> edgesType = edgesField.map(GlobArrayField::getTargetType);
+                final Optional<GlobField> edgeNode = edgesType.map(t -> t.findField("node")).map(Field::asGlobField);
+                final Optional<StringField> edgeCursor = edgesType.map(t -> t.findField("cursor")).map(Field::asStringField);
                 final Optional<GqlField> pageInfoGQLField = pageInfoField.map( pi -> gqlField.gqlGlobType().aliasToField.get(pi));
                 final Optional<MutableGlob> pageInfo = pageInfoField.map(globField -> globField.getTargetType().instantiate());
 
                 Glob first = null;
                 Glob last = null;
-                final GqlField edgeGQLField = gqlField.gqlGlobType().aliasToField.get(edgesField);
-                boolean withCursor = edgeCursor.isPresent();
-                Optional<GqlField> nodeGqlField = edgeNode.map( en -> edgeGQLField.gqlGlobType().aliasToField.get(en));
-                if (nodeGqlField.isPresent()) {
-                    nodeType = nodeGqlField.get().gqlGlobType();
-                    for (Glob value : values) {
-                        if (first == null) {
-                            first = value;
-                        }
-                        last = value;
-                        final MutableGlob edge = edgesType.instantiate();
-                        if (withCursor) {
-                            final MutableGlob st = getCursor(gqlField, connectionInfo, value, value.getType())
-                                    .set(CursorType.lastId, value.get(connectionInfo.uuidField()));
-                            edge.set(edgeCursor.get(), Base64.getEncoder().encodeToString(GSonUtils.encode(st, true).getBytes(StandardCharsets.UTF_8)));
-                        }
+                if (edgesField.isPresent() && edgesType.isPresent()) {
+                    final GqlField edgeGQLField = gqlField.gqlGlobType().aliasToField.get(edgesField.get());
+                    boolean withCursor = edgeCursor.isPresent();
+                    Optional<GqlField> nodeGqlField = edgeNode.map( en -> edgeGQLField.gqlGlobType().aliasToField.get(en));
+                    if (nodeGqlField.isPresent()) {
+                        nodeType = nodeGqlField.get().gqlGlobType();
+                        for (Glob value : values) {
+                            if (first == null) {
+                                first = value;
+                            }
+                            last = value;
+                            final MutableGlob edge = edgesType.get().instantiate();
+                            if (withCursor) {
+                                final MutableGlob st = getCursor(gqlField, connectionInfo, value, value.getType())
+                                        .set(CursorType.lastId, value.get(connectionInfo.uuidField()));
+                                edge.set(edgeCursor.get(), Base64.getEncoder().encodeToString(GSonUtils.encode(st, true).getBytes(StandardCharsets.UTF_8)));
+                            }
 //                    edge.set(edgeNode, value);
-                        newNode.add(
-                                connectionNode
-                                        .addChild(edgesField, edgeGQLField.gqlGlobType(), edge)
-                                        .addChild(edgeNode.get(), nodeType, value));
+                            newNode.add(
+                                    connectionNode
+                                            .addChild(edgesField.get(), edgeGQLField.gqlGlobType(), edge)
+                                            .addChild(edgeNode.get(), nodeType, value));
+                        }
                     }
                 }
                 if (first != null) {
