@@ -107,7 +107,7 @@ public class DefaultDbGraphqlQuery implements DbGraphqlQuery {
             boolean hasNext = top.map(m -> m + 1 == count.count).orElse(false);
             return new CursorPosition(count.count != 0 && hasPrevious, hasNext);
         } catch (Exception e) {
-            final String msg = "Fail to query treatments";
+            final String msg = "Fail to query " + idField.getGlobType().getName();
             LOGGER.error(msg, e);
             throw new RuntimeException(e);
         }
