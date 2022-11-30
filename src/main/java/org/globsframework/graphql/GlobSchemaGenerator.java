@@ -27,9 +27,9 @@ public class GlobSchemaGenerator {
     Set<GlobType> types = new LinkedHashSet<>();
     private Map<String, String[]> enums = new HashMap<>();
 
-    public GlobSchemaGenerator(GlobType type, GlobModel parameters) {
+    public GlobSchemaGenerator(GlobType schemaType, GlobModel parameters) {
         this.parameters = parameters;
-        add(type);
+        add(schemaType);
     }
 
     private void check() {
@@ -111,7 +111,9 @@ public class GlobSchemaGenerator {
 
     String generate(GlobType type) {
         StringBuilder desc = new StringBuilder();
-        desc.append("type ");
+        if (!type.getName().equals("schema")) {
+            desc.append("type ");
+        }
         desc.append(type.getName()).append(" {\n");
         for (Field field : type.getFields()) {
             desc.append(FieldNameAnnotationType.getName(field));
