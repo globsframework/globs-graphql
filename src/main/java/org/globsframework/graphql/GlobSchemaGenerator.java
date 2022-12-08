@@ -44,24 +44,24 @@ public class GlobSchemaGenerator {
                 .scalar(GraphQLScalarType.newScalar().name("DateTime")
                         .coercing(new GraphqlStringCoercing())
                         .build())
-                .scalar(GraphQLScalarType.newScalar().name("Long")
-                        .coercing(new Coercing<Long, Long>() {
-                            @Override
-                            public Long serialize(Object dataFetcherResult) throws CoercingSerializeException {
-                                return null;
-                            }
-
-                            @Override
-                            public Long parseValue(Object input) throws CoercingParseValueException {
-                                return null;
-                            }
-
-                            @Override
-                            public Long parseLiteral(Object input) throws CoercingParseLiteralException {
-                                return null;
-                            }
-                        })
-                        .build())
+//                .scalar(GraphQLScalarType.newScalar().name("Long")
+//                        .coercing(new Coercing<Long, Long>() {
+//                            @Override
+//                            public Long serialize(Object dataFetcherResult) throws CoercingSerializeException {
+//                                return null;
+//                            }
+//
+//                            @Override
+//                            public Long parseValue(Object input) throws CoercingParseValueException {
+//                                return null;
+//                            }
+//
+//                            @Override
+//                            public Long parseLiteral(Object input) throws CoercingParseLiteralException {
+//                                return null;
+//                            }
+//                        })
+//                        .build())
 //                    .type("Query", builder -> builder.dataFetcher("hello", new StaticDataFetcher("world")))
                 .build();
 
