@@ -39,7 +39,7 @@ public class GlobSchemaGeneratorTest extends TestCase {
                 "firstName : String\n" +
                 "lastName : String\n" +
                 "birthDate : birthDate\n" +
-                "friends(sort:String) : [human]\n" +
+                "friends(sort:String, name:[String]) : [human]\n" +
                 "}\n" +
                 "\n" +
                 "\n" +
