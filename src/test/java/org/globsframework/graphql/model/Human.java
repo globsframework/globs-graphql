@@ -4,10 +4,7 @@ import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.GlobTypeLoaderFactory;
 import org.globsframework.metamodel.annotations.KeyField;
 import org.globsframework.metamodel.annotations.Target;
-import org.globsframework.metamodel.fields.GlobArrayField;
-import org.globsframework.metamodel.fields.GlobField;
-import org.globsframework.metamodel.fields.IntegerField;
-import org.globsframework.metamodel.fields.StringField;
+import org.globsframework.metamodel.fields.*;
 
 public class Human {
     public static GlobType TYPE;
@@ -32,6 +29,8 @@ public class Human {
         public static GlobType TYPE;
 
         public static StringField sort;
+
+        public static StringArrayField name;
 
         static {
             GlobTypeLoaderFactory.create(FriendQueryParam.class).load();

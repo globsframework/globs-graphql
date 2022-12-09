@@ -82,8 +82,7 @@ public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
             try {
                 if (ctx2.peek() != JsonToken.NULL) {
                     field.safeVisit(fieldVisitor, mutableGlob, ctx2);
-                }
-                else {
+                } else {
                     mutableGlob.setValue(field, null);
                 }
             } catch (IOException e) {
@@ -95,7 +94,7 @@ public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
 
     public static class ExtractValue extends GraphqlBaseVisitor<ExtractValue> {
         private final Map<String, String> variables;
-        private String value;
+        private String value = "";
 
         public ExtractValue(Map<String, String> variables) {
             this.variables = variables;
@@ -108,13 +107,13 @@ public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
             if (!variables.containsKey(extractName.name)) {
                 throw new RuntimeException("No value for variable " + extractName.name);
             }
-             value = variables.get(extractName.name);
+            value = variables.get(extractName.name);
             return this;
         }
 
         @Override
         public ExtractValue visitTerminal(TerminalNode node) {
-            value = node.getText();
+            value += node.getText();
             return super.visitTerminal(node);
         }
     }

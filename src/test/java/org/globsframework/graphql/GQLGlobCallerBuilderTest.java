@@ -147,7 +147,7 @@ public class GQLGlobCallerBuilderTest extends TestCase {
                     "     birthDate {" +
                     "       year" +
                     "     }" +
-                    "     friends(sort: \"lastName\") {" +
+                    "     friends(sort: \"lastName\" name: []) {" +
                     "        firstName" +
                     "        friends(sort: \"lastName\") {" +
                     "           firstName" +
