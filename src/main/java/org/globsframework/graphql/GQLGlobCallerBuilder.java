@@ -1,6 +1,5 @@
 package org.globsframework.graphql;
 
-import com.mysql.cj.log.Log;
 import org.globsframework.functional.FunctionalKey;
 import org.globsframework.functional.FunctionalKeyBuilder;
 import org.globsframework.graphql.model.GQLPageInfo;
@@ -45,8 +44,7 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
             final SimpleGQLGlobFieldMapper value = new SimpleGQLGlobFieldMapper(fromField, field);
             fieldMapper.put(field, type, value);
             return value;
-        }
-        else {
+        } else {
             return gqlGlobFieldMapper;
         }
     }
@@ -283,7 +281,8 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
             return CompletableFuture.allOf(futurs.toArray(CompletableFuture[]::new));
         }
 
-        record PageInfoField(GlobType pageType, StringField startCursor, BooleanField hasNextPage, StringField endCursor, BooleanField hasPreviousPage) {
+        record PageInfoField(GlobType pageType, StringField startCursor, BooleanField hasNextPage,
+                             StringField endCursor, BooleanField hasPreviousPage) {
         }
 
         static PageInfoField extract(GlobType pageType) {
@@ -313,7 +312,7 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
                 final Optional<GlobType> edgesType = edgesField.map(GlobArrayField::getTargetType);
                 final Optional<GlobField> edgeNode = edgesType.map(t -> t.findField("node")).map(Field::asGlobField);
                 final Optional<StringField> edgeCursor = edgesType.map(t -> t.findField("cursor")).map(Field::asStringField);
-                final Optional<GqlField> pageInfoGQLField = pageInfoField.map( pi -> gqlField.gqlGlobType().aliasToField.get(pi));
+                final Optional<GqlField> pageInfoGQLField = pageInfoField.map(pi -> gqlField.gqlGlobType().aliasToField.get(pi));
                 final Optional<MutableGlob> pageInfo = pageInfoField.map(globField -> globField.getTargetType().instantiate());
 
                 Glob first = null;
@@ -321,7 +320,7 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
                 if (edgesField.isPresent() && edgesType.isPresent()) {
                     final GqlField edgeGQLField = gqlField.gqlGlobType().aliasToField.get(edgesField.get());
                     boolean withCursor = edgeCursor.isPresent();
-                    Optional<GqlField> nodeGqlField = edgeNode.map( en -> edgeGQLField.gqlGlobType().aliasToField.get(en));
+                    Optional<GqlField> nodeGqlField = edgeNode.map(en -> edgeGQLField.gqlGlobType().aliasToField.get(en));
                     if (nodeGqlField.isPresent()) {
                         nodeType = nodeGqlField.get().gqlGlobType();
                         for (Glob value : values) {
