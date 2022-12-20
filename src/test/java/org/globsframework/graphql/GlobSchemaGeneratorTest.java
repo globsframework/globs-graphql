@@ -8,10 +8,7 @@ import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 import junit.framework.TestCase;
-import org.globsframework.graphql.model.Human;
-import org.globsframework.graphql.model.HumanQuery;
-import org.globsframework.graphql.model.HumansQuery;
-import org.globsframework.graphql.model.QueryType;
+import org.globsframework.graphql.model.*;
 import org.globsframework.metamodel.impl.DefaultGlobModel;
 import org.globsframework.model.Glob;
 import org.junit.Assert;
@@ -22,13 +19,14 @@ public class GlobSchemaGeneratorTest extends TestCase {
 
     public void testGenerateSchema() {
         GlobSchemaGenerator globSchemaGenerator = new GlobSchemaGenerator(QueryType.TYPE,
-                new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, Human.FriendQueryParam.TYPE));
+                new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, Human.FriendQueryParam.TYPE, CreateParam.TYPE));
         Assert.assertEquals("scalar Date\n" +
                 "scalar DateTime\n" +
                 "scalar Long\n" +
                 "type Query {\n" +
                 "humain(id:String) : human\n" +
                 "humains(first:Int, after:String, orderBy:String, order:String, startedAt:DateTime) : HumanConnection\n" +
+                "createHumain(humain:humanInput) : human\n" +
                 "}\n" +
                 "\n" +
                 "\n" +
@@ -75,12 +73,19 @@ public class GlobSchemaGeneratorTest extends TestCase {
                 "}\n" +
                 "\n" +
                 "\n" +
+                "\n" +
+                "input humanInput {\n" +
+                "firstName : String\n" +
+                "lastName : String\n" +
+                "}\n" +
+                "\n" +
+                "\n" +
                 "\n", globSchemaGenerator.generateAll());
     }
 
     public void testQuery() {
         GlobSchemaGenerator globSchemaGenerator = new GlobSchemaGenerator(QueryType.TYPE,
-                new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, Human.FriendQueryParam.TYPE));
+                new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, Human.FriendQueryParam.TYPE, CreateParam.TYPE));
 
         SchemaParser schemaParser = new SchemaParser();
         TypeDefinitionRegistry typeDefinitionRegistry = schemaParser.parse(globSchemaGenerator.generateAll());

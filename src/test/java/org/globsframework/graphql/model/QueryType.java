@@ -16,6 +16,10 @@ public class QueryType {
     @Target(HumanConnection.class)
     public static GlobField humains;
 
+    @Target(Human.class)
+    @GQLQueryParam_(CreateParam.class)
+    public static GlobField createHumain;
+
     static {
         GlobTypeLoaderFactory.create(QueryType.class, "Query").load();
     }

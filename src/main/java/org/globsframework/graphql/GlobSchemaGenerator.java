@@ -24,11 +24,15 @@ import static graphql.schema.idl.RuntimeWiring.newRuntimeWiring;
 
 public class GlobSchemaGenerator {
     private final GlobModel parameters;
-    Set<GlobType> types = new LinkedHashSet<>();
-    private Map<String, String[]> enums = new HashMap<>();
+    private final Set<GlobType> types = new LinkedHashSet<>();
+    private final Set<GlobType> input = new LinkedHashSet<>();
+    private final Map<String, String[]> enums = new HashMap<>();
 
     public GlobSchemaGenerator(GlobType schemaType, GlobModel parameters) {
         this.parameters = parameters;
+        for (GlobType parameter : parameters) {
+            addChildInput(parameter);
+        }
         add(schemaType);
     }
 
@@ -87,7 +91,11 @@ public class GlobSchemaGenerator {
             stringBuilder.append("}\n");
         }
         for (GlobType type : types) {
-            stringBuilder.append(generate(type));
+            stringBuilder.append(generate(type, type.getName().equals("schema") ? "" : "type "));
+            stringBuilder.append("\n\n");
+        }
+        for (GlobType type : input) {
+            stringBuilder.append(generate(type, "input "));
             stringBuilder.append("\n\n");
         }
         return stringBuilder.toString();
@@ -109,11 +117,29 @@ public class GlobSchemaGenerator {
         }
     }
 
-    String generate(GlobType type) {
-        StringBuilder desc = new StringBuilder();
-        if (!type.getName().equals("schema")) {
-            desc.append("type ");
+    public void addInput(GlobType type) {
+        if (input.add(type)) {
+            addChildInput(type);
         }
+    }
+
+    private void addChildInput(GlobType type) {
+        for (Field field : type.getFields()) {
+            if (field instanceof GlobField) {
+                addInput(((GlobField) field).getTargetType());
+            } else if (field instanceof GlobArrayField) {
+                addInput(((GlobArrayField) field).getTargetType());
+            }
+            if (field.hasAnnotation(GraphqlEnum.UNIQUE_KEY)) {
+                final Glob annotation = field.getAnnotation(GraphqlEnum.UNIQUE_KEY);
+                enums.put(annotation.get(GraphqlEnum.name), annotation.get(GraphqlEnum.values));
+            }
+        }
+    }
+
+    String generate(GlobType type, String graphqlType) {
+        StringBuilder desc = new StringBuilder();
+        desc.append(graphqlType);
         desc.append(type.getName()).append(" {\n");
         for (Field field : type.getFields()) {
             desc.append(FieldNameAnnotationType.getName(field));
