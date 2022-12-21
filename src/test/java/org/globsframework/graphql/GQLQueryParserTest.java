@@ -1,10 +1,7 @@
 package org.globsframework.graphql;
 
 import junit.framework.TestCase;
-import org.globsframework.graphql.model.CreateParam;
-import org.globsframework.graphql.model.HumanQuery;
-import org.globsframework.graphql.model.HumansQuery;
-import org.globsframework.graphql.model.QueryType;
+import org.globsframework.graphql.model.*;
 import org.globsframework.graphql.parser.GqlField;
 import org.globsframework.json.GSonUtils;
 import org.globsframework.metamodel.impl.DefaultGlobModel;
@@ -14,9 +11,9 @@ import java.util.Map;
 public class GQLQueryParserTest extends TestCase {
 
     public void testMutation() {
-        GQLQueryParser gqlQueryParser = new GQLQueryParser(QueryType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, CreateParam.TYPE));
+        GQLQueryParser gqlQueryParser = new GQLQueryParser(SchemaType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, CreateParam.TYPE));
         gqlQueryParser.parse("""
-                {
+                mutation {
                     createHumain(humain: $humain){
                        firstName
                        lastName
@@ -28,7 +25,7 @@ public class GQLQueryParserTest extends TestCase {
     }
 
     public void testName() {
-        GQLQueryParser gqlQueryParser = new GQLQueryParser(QueryType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, CreateParam.TYPE));
+        GQLQueryParser gqlQueryParser = new GQLQueryParser(SchemaType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, CreateParam.TYPE));
         GQLGlobType parse = gqlQueryParser.parse("{" +
                 "   humain(id: $AZE) {" +
                 "     firstName" +
@@ -45,7 +42,7 @@ public class GQLQueryParserTest extends TestCase {
     }
 
     public void testWithQuery() {
-        GQLQueryParser gqlQueryParser = new GQLQueryParser(QueryType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE));
+        GQLQueryParser gqlQueryParser = new GQLQueryParser(SchemaType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE));
         GQLGlobType parse = gqlQueryParser.parse("query {" +
                 "   humain(id: $AZE) {" +
                 "     firstName" +
@@ -59,7 +56,7 @@ public class GQLQueryParserTest extends TestCase {
     }
 
     public void testFragment() {
-        GQLQueryParser gqlQueryParser = new GQLQueryParser(QueryType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE));
+        GQLQueryParser gqlQueryParser = new GQLQueryParser(SchemaType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE));
         GQLGlobType parse = gqlQueryParser.parse("{" +
                 "   first: humain(id: $AZE) {" +
                 "     ...common" +

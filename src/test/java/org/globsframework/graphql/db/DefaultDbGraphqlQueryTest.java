@@ -60,7 +60,8 @@ public class DefaultDbGraphqlQueryTest {
             }
         }, DbHumain.uuid, HumainQuery.Parameter.orderBy);
 
-        final GQLGlobCaller<GQLGlobCaller.GQLContext> build = gqlGlobCallerBuilder.build(HumainQuery.TYPE, new DefaultGlobModel(HumainQuery.Parameter.TYPE));
+        final GQLGlobCaller<GQLGlobCaller.GQLContext> build =
+                gqlGlobCallerBuilder.build(SchemaType.TYPE, new DefaultGlobModel(HumainQuery.Parameter.TYPE));
 
         String before = null;
         String after = null;
@@ -122,6 +123,16 @@ public class DefaultDbGraphqlQueryTest {
                 new GQLGlobCaller.GQLContext() {
                 });
         return query;
+    }
+
+    public static class SchemaType {
+        public static GlobType TYPE;
+
+        @Target(HumainQuery.class)
+        public static GlobField query;
+        static {
+            GlobTypeLoaderFactory.create(SchemaType.class).load();
+        }
     }
 
     public static class HumainQuery {

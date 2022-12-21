@@ -137,10 +137,10 @@ public class GQLGlobCallerBuilderTest extends TestCase {
             }
         }, id, HumansQuery.orderBy);
 
-        GQLGlobCaller gqlGlobCaller = gqlGlobCallerBuilder.build(QueryType.TYPE,
+        GQLGlobCaller gqlGlobCaller = gqlGlobCallerBuilder.build(SchemaType.TYPE,
                 new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, Human.FriendQueryParam.TYPE));
         {
-            final CompletableFuture<Glob> id1 = gqlGlobCaller.query("{" +
+            final CompletableFuture<Glob> id1 = gqlGlobCaller.query("query toto {" +
                     "   humain(id: $ID) {" +
                     "     firstName" +
                     "     lastName" +

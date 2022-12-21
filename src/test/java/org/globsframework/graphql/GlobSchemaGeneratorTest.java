@@ -18,7 +18,7 @@ import static graphql.schema.idl.RuntimeWiring.newRuntimeWiring;
 public class GlobSchemaGeneratorTest extends TestCase {
 
     public void testGenerateSchema() {
-        GlobSchemaGenerator globSchemaGenerator = new GlobSchemaGenerator(QueryType.TYPE,
+        GlobSchemaGenerator globSchemaGenerator = new GlobSchemaGenerator(SchemaType.TYPE,
                 new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, Human.FriendQueryParam.TYPE, CreateParam.TYPE));
         Assert.assertEquals("scalar Date\n" +
                 "scalar DateTime\n" +
@@ -26,7 +26,6 @@ public class GlobSchemaGeneratorTest extends TestCase {
                 "type Query {\n" +
                 "humain(id:String) : human\n" +
                 "humains(first:Int, after:String, orderBy:String, order:String, startedAt:DateTime) : HumanConnection\n" +
-                "createHumain(humain:humanInput) : human\n" +
                 "}\n" +
                 "\n" +
                 "\n" +
@@ -74,6 +73,12 @@ public class GlobSchemaGeneratorTest extends TestCase {
                 "\n" +
                 "\n" +
                 "\n" +
+                "type Mutation {\n" +
+                "createHumain(humain:humanInput) : human\n" +
+                "}\n" +
+                "\n" +
+                "\n" +
+                "\n" +
                 "input humanInput {\n" +
                 "firstName : String\n" +
                 "lastName : String\n" +
@@ -84,7 +89,7 @@ public class GlobSchemaGeneratorTest extends TestCase {
     }
 
     public void testQuery() {
-        GlobSchemaGenerator globSchemaGenerator = new GlobSchemaGenerator(QueryType.TYPE,
+        GlobSchemaGenerator globSchemaGenerator = new GlobSchemaGenerator(SchemaType.TYPE,
                 new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, Human.FriendQueryParam.TYPE, CreateParam.TYPE));
 
         SchemaParser schemaParser = new SchemaParser();

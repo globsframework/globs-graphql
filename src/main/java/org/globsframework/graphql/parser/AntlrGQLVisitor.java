@@ -23,16 +23,19 @@ import java.util.Map;
 public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AntlrGQLVisitor.class);
     private static final ReadJsonWithReaderFieldVisitor fieldVisitor = new ReadJsonWithReaderFieldVisitor();
+    private GlobType schemaType;
+    private GlobModel paramTypes;
     private final Map<String, String> variables;
     private Map<String, GraphqlParser.SelectionSetContext> fragments;
     private final Deque<GqlGlobBuilder> trees = new ArrayDeque<>();
     private GQLGlobType gqlGlobType;
+    private String operation;
 
-    public AntlrGQLVisitor(GlobType rootQuery, GlobModel paramTypes, Map<String, String> variables, Map<String, GraphqlParser.SelectionSetContext> fragments) {
+    public AntlrGQLVisitor(GlobType schemaType, GlobModel paramTypes, Map<String, String> variables, Map<String, GraphqlParser.SelectionSetContext> fragments) {
+        this.schemaType = schemaType;
+        this.paramTypes = paramTypes;
         this.variables = variables;
         this.fragments = fragments;
-        GQLGlobSelection selection = new GQLGlobSelection(rootQuery, paramTypes, gqlGlobType1 -> gqlGlobType = gqlGlobType1);
-        trees.push(selection);
     }
 
     public GQLGlobType complete() {
@@ -40,6 +43,12 @@ public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
         return gqlGlobType;
     }
 
+    public AntlrGQLVisitor visitOperationType(GraphqlParser.OperationTypeContext ctx) {
+        final ExtractValue visitor = new ExtractValue(variables);
+        ctx.accept(visitor);
+        operation = visitor.value;
+        return this;
+    }
 
     static class Arguments extends GraphqlBaseVisitor<Arguments> {
         private final MutableGlob mutableGlob;
@@ -128,6 +137,9 @@ public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
     }
 
     public AntlrGQLVisitor visitSelectionSet(GraphqlParser.SelectionSetContext ctx) {
+        GQLGlobSelection selection = new GQLGlobSelection(schemaType.getField(operation == null ? "query" : operation)
+                .asGlobField().getTargetType(), paramTypes, gqlGlobType1 -> gqlGlobType = gqlGlobType1);
+        trees.push(selection);
         ExtractSelectionSet selectionSet = new ExtractSelectionSet();
         selectionSet.visitSelectionSet(ctx);
         return this;

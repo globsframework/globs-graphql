@@ -3,7 +3,8 @@ package org.globsframework.graphql;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.scalar.GraphqlStringCoercing;
-import graphql.schema.*;
+import graphql.schema.GraphQLScalarType;
+import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.RuntimeWiring;
 import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
@@ -33,7 +34,7 @@ public class GlobSchemaGenerator {
         for (GlobType parameter : parameters) {
             addChildInput(parameter);
         }
-        add(schemaType);
+        loopType(schemaType);
     }
 
     private void check() {
@@ -91,7 +92,7 @@ public class GlobSchemaGenerator {
             stringBuilder.append("}\n");
         }
         for (GlobType type : types) {
-            stringBuilder.append(generate(type, type.getName().equals("schema") ? "" : "type "));
+            stringBuilder.append(generate(type, "type "));
             stringBuilder.append("\n\n");
         }
         for (GlobType type : input) {
@@ -103,16 +104,20 @@ public class GlobSchemaGenerator {
 
     public void add(GlobType type) {
         if (types.add(type)) {
-            for (Field field : type.getFields()) {
-                if (field instanceof GlobField) {
-                    add(((GlobField) field).getTargetType());
-                } else if (field instanceof GlobArrayField) {
-                    add(((GlobArrayField) field).getTargetType());
-                }
-                if (field.hasAnnotation(GraphqlEnum.UNIQUE_KEY)) {
-                    final Glob annotation = field.getAnnotation(GraphqlEnum.UNIQUE_KEY);
-                    enums.put(annotation.get(GraphqlEnum.name), annotation.get(GraphqlEnum.values));
-                }
+            loopType(type);
+        }
+    }
+
+    private void loopType(GlobType type) {
+        for (Field field : type.getFields()) {
+            if (field instanceof GlobField) {
+                add(((GlobField) field).getTargetType());
+            } else if (field instanceof GlobArrayField) {
+                add(((GlobArrayField) field).getTargetType());
+            }
+            if (field.hasAnnotation(GraphqlEnum.UNIQUE_KEY)) {
+                final Glob annotation = field.getAnnotation(GraphqlEnum.UNIQUE_KEY);
+                enums.put(annotation.get(GraphqlEnum.name), annotation.get(GraphqlEnum.values));
             }
         }
     }
