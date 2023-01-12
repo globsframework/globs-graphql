@@ -11,14 +11,13 @@ import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobModel;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.model.MutableGlob;
+import org.globsframework.utils.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.Map;
+import java.util.*;
 
 public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AntlrGQLVisitor.class);
@@ -110,6 +109,15 @@ public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
         }
 
         @Override
+        public ExtractValue visitArrayValueWithVariable(GraphqlParser.ArrayValueWithVariableContext ctx) {
+            ExtractValues extractValues = new ExtractValues(variables);
+            extractValues.visitArrayValueWithVariable(ctx);
+            value = "[";
+            value += Strings.joinWithSeparator(",", extractValues.values);
+            value += "]";
+            return this;
+        }
+
         public ExtractValue visitVariable(GraphqlParser.VariableContext ctx) {
             ExtractName extractName = new ExtractName();
             extractName.visitVariable(ctx);
@@ -120,11 +128,27 @@ public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
             return this;
         }
 
-        @Override
         public ExtractValue visitTerminal(TerminalNode node) {
-            value += node.getText();
+            value = node.getText();
             return super.visitTerminal(node);
         }
+    }
+
+    public static class ExtractValues extends GraphqlBaseVisitor<ExtractValues> {
+        private final Map<String, String> variables;
+        private List<String> values = new ArrayList<>();
+
+        public ExtractValues(Map<String, String> variables) {
+            this.variables = variables;
+        }
+
+        public ExtractValues visitValueWithVariable(GraphqlParser.ValueWithVariableContext ctx) {
+            ExtractValue extractValue = new ExtractValue(variables);
+            extractValue.visitValueWithVariable(ctx);
+            values.add(extractValue.value);
+            return this;
+        }
+
     }
 
     public static class ExtractName extends GraphqlBaseVisitor<ExtractName> {
