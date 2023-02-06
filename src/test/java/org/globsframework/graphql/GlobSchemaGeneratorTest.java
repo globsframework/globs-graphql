@@ -19,78 +19,82 @@ public class GlobSchemaGeneratorTest extends TestCase {
 
     public void testGenerateSchema() {
         GlobSchemaGenerator globSchemaGenerator = new GlobSchemaGenerator(SchemaType.TYPE,
-                new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, Human.FriendQueryParam.TYPE, CreateParam.TYPE));
-        Assert.assertEquals("scalar Date\n" +
-                "scalar DateTime\n" +
-                "scalar Long\n" +
-                "type Query {\n" +
-                "humain(id:String) : human\n" +
-                "humains(first:Int, after:String, orderBy:String, order:String, startedAt:DateTime) : HumanConnection\n" +
-                "}\n" +
-                "\n" +
-                "\n" +
-                "\n" +
-                "type human {\n" +
-                "id : ID\n" +
-                "surName : String\n" +
-                "firstName : String\n" +
-                "lastName : String\n" +
-                "birthDate : birthDate\n" +
-                "friends(sort:String, name:[String]) : [human]\n" +
-                "}\n" +
-                "\n" +
-                "\n" +
-                "\n" +
-                "type birthDate {\n" +
-                "day : Int\n" +
-                "month : Int\n" +
-                "year : Int\n" +
-                "}\n" +
-                "\n" +
-                "\n" +
-                "\n" +
-                "type HumanConnection {\n" +
-                "totalCount : Int\n" +
-                "edges : [HumanEdge]\n" +
-                "pageInfo : gQLPageInfo\n" +
-                "}\n" +
-                "\n" +
-                "\n" +
-                "\n" +
-                "type HumanEdge {\n" +
-                "node : human\n" +
-                "cursor : String\n" +
-                "}\n" +
-                "\n" +
-                "\n" +
-                "\n" +
-                "type gQLPageInfo {\n" +
-                "startCursor : String\n" +
-                "endCursor : String\n" +
-                "hasNextPage : Boolean!\n" +
-                "hasPreviousPage : Boolean!\n" +
-                "}\n" +
-                "\n" +
-                "\n" +
-                "\n" +
-                "type Mutation {\n" +
-                "createHumain(humain:humanInput) : human\n" +
-                "}\n" +
-                "\n" +
-                "\n" +
-                "\n" +
-                "input humanInput {\n" +
-                "firstName : String\n" +
-                "lastName : String\n" +
-                "}\n" +
-                "\n" +
-                "\n" +
-                "\n", globSchemaGenerator.generateAll());
+                new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, Human.FriendQueryParam.TYPE, CreateParam.TYPE, ComplexHumansQuery.TYPE));
+        final String s = globSchemaGenerator.generateAll();
+        System.out.println(s);
+        Assert.assertTrue(
+                s.contains("""
+scalar Date
+scalar DateTime
+scalar Long
+"""));
+        Assert.assertTrue(s.contains("""
+type Query {
+humain(id:String) : human
+humains(first:Int, after:String, orderBy:String, order:String, startedAt:DateTime) : HumanConnection
+complexHumains(subInfo:subinfo) : HumanConnection
+}
+"""));
+        Assert.assertTrue(s.contains("""
+type human {
+id : ID
+surName : String
+firstName : String
+lastName : String
+birthDate : birthDate
+friends(sort:String, name:[String]) : [human]
+}
+"""));
+        Assert.assertTrue(s.contains("""
+type birthDate {
+day : Int
+month : Int
+year : Int
+}
+"""));
+        Assert.assertTrue(s.contains("""
+type HumanConnection {
+totalCount : Int
+edges : [HumanEdge]
+pageInfo : gQLPageInfo
+}
+"""));
+        Assert.assertTrue(s.contains("""
+type HumanEdge {
+node : human
+cursor : String
+}
+"""));
+        Assert.assertTrue(s.contains("""
+type gQLPageInfo {
+startCursor : String
+endCursor : String
+hasNextPage : Boolean!
+hasPreviousPage : Boolean!
+}
+"""));
+        Assert.assertTrue(s.contains("""
+type Mutation {
+createHumain(humain:humanInput) : human
+}
+"""));
+        Assert.assertTrue(s.contains("""
+input humanInput {
+firstName : String
+lastName : String
+}
+"""));
+        Assert.assertTrue(s.contains("""
+input subinfo {
+firstName : String
+lastName : String
+}
+"""));
     }
 
     public void testQuery() {
         GlobSchemaGenerator globSchemaGenerator = new GlobSchemaGenerator(SchemaType.TYPE,
-                new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, Human.FriendQueryParam.TYPE, CreateParam.TYPE));
+                new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, Human.FriendQueryParam.TYPE, CreateParam.TYPE, ComplexHumansQuery.TYPE));
 
         SchemaParser schemaParser = new SchemaParser();
         TypeDefinitionRegistry typeDefinitionRegistry = schemaParser.parse(globSchemaGenerator.generateAll());

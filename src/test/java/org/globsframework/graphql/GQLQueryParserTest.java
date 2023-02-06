@@ -11,7 +11,7 @@ import java.util.Map;
 public class GQLQueryParserTest extends TestCase {
 
     public void testMutation() {
-        GQLQueryParser gqlQueryParser = new GQLQueryParser(SchemaType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, CreateParam.TYPE));
+        GQLQueryParser gqlQueryParser = new GQLQueryParser(SchemaType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, CreateParam.TYPE, ComplexHumansQuery.TYPE));
         gqlQueryParser.parse("""
                 mutation {
                     createHumain(humain: $humain){
@@ -25,7 +25,7 @@ public class GQLQueryParserTest extends TestCase {
     }
 
     public void testName() {
-        GQLQueryParser gqlQueryParser = new GQLQueryParser(SchemaType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, CreateParam.TYPE));
+        GQLQueryParser gqlQueryParser = new GQLQueryParser(SchemaType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, CreateParam.TYPE, ComplexHumansQuery.TYPE));
         GQLGlobType parse = gqlQueryParser.parse("{" +
                 "   humain(id: $AZE) {" +
                 "     firstName" +
@@ -55,8 +55,22 @@ public class GQLQueryParserTest extends TestCase {
 
     }
 
+    public void testWithComplexQuery() {
+        GQLQueryParser gqlQueryParser = new GQLQueryParser(SchemaType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, ComplexHumansQuery.TYPE));
+        GQLGlobType parse = gqlQueryParser.parse("""
+                query {
+                   complexHumains(subInfo: $VAR) {
+                     totalCount
+                   }
+                }
+                """, Map.of("VAR", GSonUtils.encode(ComplexHumansQuery.TYPE.instantiate()
+                .set(ComplexHumansQuery.subInfo, ComplexHumansQuery.Subinfo.TYPE.instantiate()
+                        .set(ComplexHumansQuery.Subinfo.firstName, "titi")), false)));
+
+    }
+
     public void testFragment() {
-        GQLQueryParser gqlQueryParser = new GQLQueryParser(SchemaType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE));
+        GQLQueryParser gqlQueryParser = new GQLQueryParser(SchemaType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, ComplexHumansQuery.TYPE));
         GQLGlobType parse = gqlQueryParser.parse("{" +
                 "   first: humain(id: $AZE) {" +
                 "     ...common" +
