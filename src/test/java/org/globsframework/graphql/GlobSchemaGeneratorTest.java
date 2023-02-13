@@ -32,7 +32,7 @@ scalar Long
 type Query {
 humain(id:String) : human
 humains(first:Int, after:String, orderBy:String, order:String, startedAt:DateTime) : HumanConnection
-complexHumains(subInfo:subinfo) : HumanConnection
+complexHumains(who:String, subInfo:subinfo) : HumanConnection
 }
 """));
         Assert.assertTrue(s.contains("""

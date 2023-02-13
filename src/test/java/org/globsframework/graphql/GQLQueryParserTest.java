@@ -5,8 +5,11 @@ import org.globsframework.graphql.model.*;
 import org.globsframework.graphql.parser.GqlField;
 import org.globsframework.json.GSonUtils;
 import org.globsframework.metamodel.impl.DefaultGlobModel;
+import org.globsframework.model.Glob;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class GQLQueryParserTest extends TestCase {
 
@@ -41,6 +44,21 @@ public class GQLQueryParserTest extends TestCase {
         assertEquals(3, gqlField.gqlGlobType().aliasToField.size());
     }
 
+    public void testWithArray() {
+        GQLQueryParser gqlQueryParser = new GQLQueryParser(SchemaType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, CreateParam.TYPE, ComplexHumansQuery.TYPE, Human.FriendQueryParam.TYPE));
+        {
+            final GQLGlobType type = gqlQueryParser.parse("query toto {" +
+                    "  humain{" +
+                    "     friends(sort: \"lastName\" name: [\"a\",\"b\"]) {" +
+                    "        firstName" +
+                    "     }" +
+                    "   }" +
+                    "  }" +
+                    "}", Map.of("ID", "\"AZE\""));
+            final Collection<GqlField> values = type.aliasToField.values();
+        }
+    }
+
     public void testWithQuery() {
         GQLQueryParser gqlQueryParser = new GQLQueryParser(SchemaType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE));
         GQLGlobType parse = gqlQueryParser.parse("query {" +
@@ -69,6 +87,25 @@ public class GQLQueryParserTest extends TestCase {
 
     }
 
+    public void testWithComplexInParam() {
+        GQLQueryParser gqlQueryParser = new GQLQueryParser(SchemaType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, ComplexHumansQuery.TYPE));
+        final String titi = GSonUtils.encode(ComplexHumansQuery.TYPE.instantiate()
+                .set(ComplexHumansQuery.subInfo, ComplexHumansQuery.Subinfo.TYPE.instantiate()
+                        .set(ComplexHumansQuery.Subinfo.firstName, "titi")), false);
+        ;
+        GQLGlobType parse = gqlQueryParser.parse("""
+                query {
+                   complexHumains(who: "chat", subInfo: { firstName: "titi", lastName: "toto" }) {
+                     totalCount
+                   }
+                }
+                """.replace("VAR", titi.replace("\"", "\\\""))
+                , Map.of());
+    }
+/*
+'{"query":"mutation{\n  createTreatment(input: { name: \"xxx\", description: \"yyy\", namespace: \"ddd\"}){\n    name\n  }\n}","variables":{}}' --compressed
+
+ */
     public void testFragment() {
         GQLQueryParser gqlQueryParser = new GQLQueryParser(SchemaType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, ComplexHumansQuery.TYPE));
         GQLGlobType parse = gqlQueryParser.parse("{" +

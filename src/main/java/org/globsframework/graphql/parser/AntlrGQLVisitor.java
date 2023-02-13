@@ -1,27 +1,24 @@
 package org.globsframework.graphql.parser;
 
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonToken;
 import graphql.parser.antlr.GraphqlBaseVisitor;
 import graphql.parser.antlr.GraphqlParser;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.globsframework.graphql.GQLGlobType;
+import org.globsframework.json.GSonUtils;
 import org.globsframework.json.ReadJsonWithReaderFieldVisitor;
-import org.globsframework.metamodel.Field;
 import org.globsframework.metamodel.GlobModel;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.model.MutableGlob;
-import org.globsframework.utils.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.StringReader;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Map;
 
 public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AntlrGQLVisitor.class);
-    private static final ReadJsonWithReaderFieldVisitor fieldVisitor = new ReadJsonWithReaderFieldVisitor();
     private GlobType schemaType;
     private GlobModel paramTypes;
     private final Map<String, String> variables;
@@ -49,54 +46,143 @@ public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
         return this;
     }
 
-    static class Arguments extends GraphqlBaseVisitor<Arguments> {
-        private final MutableGlob mutableGlob;
-        private final Map<String, String> variables;
+    public static class State {
+        final boolean isObject;
+        final boolean isArray;
+        final boolean isArgument;
+        final boolean isAttribut;
+        boolean isFirst = true;
+        boolean isAValue;
 
-        public Arguments(MutableGlob mutableGlob, Map<String, String> variables) {
-            this.mutableGlob = mutableGlob;
-            this.variables = variables;
+        public State() {
+            isObject = false;
+            isArray = false;
+            isArgument = false;
+            isAttribut = false;
         }
 
-        @Override
-        public Arguments visitArgument(GraphqlParser.ArgumentContext ctx) {
-            LOGGER.debug("visitArgument " + ctx.getText());
-            ExtractArgument extractArgument = new ExtractArgument(mutableGlob, variables);
-            extractArgument.visitArgument(ctx);
-            return this;
+        public State(boolean isObject, boolean isArray, boolean isArgument,
+                     boolean isAttribut, boolean isAValue) {
+            this.isObject = isObject;
+            this.isArray = isArray;
+            this.isArgument = isArgument;
+            this.isAttribut = isAttribut;
+            this.isAValue = isAValue;
+        }
+
+        public State onArray() {
+            return new State(false, true, false, false, true);
+        }
+
+        public State onObject() {
+            return new State(true, false, false, false, false);
+        }
+
+        public State onBase() {
+            return new State(isObject, isArray, isArgument, true, false);
+        }
+
+        public State onValue() {
+            return new State(isObject, isArray, isArgument, false, true);
+        }
+
+        public State onArgument() {
+            return new State(false, false, true, false, false);
         }
     }
 
-    public static class ExtractArgument extends GraphqlBaseVisitor<ExtractArgument> {
-        private final MutableGlob mutableGlob;
-        private final Map<String, String> variables;
-        private Field field;
+    public static class JsonBuilder extends GraphqlBaseVisitor<JsonBuilder> {
+        Deque<State> states = new ArrayDeque<>();
+        final Map<String, String> variables;
+        final StringBuilder stringBuilder;
 
-        public ExtractArgument(MutableGlob mutableGlob, Map<String, String> variables) {
-            this.mutableGlob = mutableGlob;
+        public JsonBuilder(Map<String, String> variables, StringBuilder stringBuilder) {
             this.variables = variables;
+            this.stringBuilder = stringBuilder;
+            states.push(new State());
         }
 
-        public ExtractArgument visitName(GraphqlParser.NameContext ctx) {
-            field = mutableGlob.getType().getField(ctx.getText());
-            return super.visitName(ctx);
+        public JsonBuilder visitArguments(GraphqlParser.ArgumentsContext ctx) {
+            states.push(new State());
+            stringBuilder.append("{");
+            final JsonBuilder jsonBuilder = super.visitArguments(ctx);
+            stringBuilder.append("}");
+            states.pop();
+            return jsonBuilder;
+        }
+
+        public JsonBuilder visitArgument(GraphqlParser.ArgumentContext ctx) {
+            if (!states.element().isFirst) {
+                stringBuilder.append(",");
+            }
+            states.element().isFirst = false;
+            states.push(states.element().onArgument());
+            final JsonBuilder jsonBuilder = super.visitArgument(ctx);
+            states.pop();
+            return jsonBuilder;
+        }
+
+        public JsonBuilder visitVariable(GraphqlParser.VariableContext ctx) {
+            ExtractName extractName = new ExtractName();
+            extractName.visitVariable(ctx);
+            if (!variables.containsKey(extractName.name)) {
+                throw new RuntimeException("No value for variable " + extractName.name);
+            }
+            stringBuilder.append(variables.get(extractName.name));
+            return this;
+        }
+
+        public JsonBuilder visitValueWithVariable(GraphqlParser.ValueWithVariableContext ctx) {
+            if (!states.element().isFirst) {
+                stringBuilder.append(",");
+            }
+            states.element().isFirst = false;
+            states.push(states.element().onValue());
+            super.visitValueWithVariable(ctx);
+            states.pop();
+            return this;
+        }
+
+        public JsonBuilder visitArrayValueWithVariable(GraphqlParser.ArrayValueWithVariableContext ctx) {
+            states.push(states.element().onArray());
+            super.visitArrayValueWithVariable(ctx);
+            states.pop();
+            return this;
         }
 
         @Override
-        public ExtractArgument visitValueWithVariable(GraphqlParser.ValueWithVariableContext ctx) {
-            ExtractValue value = new ExtractValue(variables);
-            value.visitValueWithVariable(ctx);
-            final JsonReader ctx2 = new JsonReader(new StringReader(value.value));
-            try {
-                if (ctx2.peek() != JsonToken.NULL) {
-                    field.safeVisit(fieldVisitor, mutableGlob, ctx2);
-                } else {
-                    mutableGlob.setValue(field, null);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+        public JsonBuilder visitObjectFieldWithVariable(GraphqlParser.ObjectFieldWithVariableContext ctx) {
+            if (!states.element().isFirst) {
+                stringBuilder.append(",");
             }
+            states.element().isFirst = false;
+            states.push(states.element().onObject());
+            final JsonBuilder jsonBuilder = super.visitObjectFieldWithVariable(ctx);
+            states.pop();
+            return jsonBuilder;
+        }
+
+        public JsonBuilder visitObjectValueWithVariable(GraphqlParser.ObjectValueWithVariableContext ctx) {
+            states.push(states.element().onObject());
+            super.visitObjectValueWithVariable(ctx);
+            states.pop();
             return this;
+        }
+
+        public JsonBuilder visitBaseName(GraphqlParser.BaseNameContext ctx) {
+            states.push(states.element().onBase());
+            stringBuilder.append("\"");
+            final JsonBuilder jsonBuilder = super.visitBaseName(ctx);
+            stringBuilder.append("\"");
+            states.pop();
+            return jsonBuilder;
+        }
+
+        public JsonBuilder visitTerminal(TerminalNode node) {
+            if (states.element().isObject || states.element().isArgument || states.element().isAttribut || states.element().isAValue) {
+                stringBuilder.append(node.getText());
+            }
+            return super.visitTerminal(node);
         }
     }
 
@@ -106,16 +192,6 @@ public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
 
         public ExtractValue(Map<String, String> variables) {
             this.variables = variables;
-        }
-
-        @Override
-        public ExtractValue visitArrayValueWithVariable(GraphqlParser.ArrayValueWithVariableContext ctx) {
-            ExtractValues extractValues = new ExtractValues(variables);
-            extractValues.visitArrayValueWithVariable(ctx);
-            value = "[";
-            value += Strings.joinWithSeparator(",", extractValues.values);
-            value += "]";
-            return this;
         }
 
         public ExtractValue visitVariable(GraphqlParser.VariableContext ctx) {
@@ -132,23 +208,6 @@ public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
             value = node.getText();
             return super.visitTerminal(node);
         }
-    }
-
-    public static class ExtractValues extends GraphqlBaseVisitor<ExtractValues> {
-        private final Map<String, String> variables;
-        private List<String> values = new ArrayList<>();
-
-        public ExtractValues(Map<String, String> variables) {
-            this.variables = variables;
-        }
-
-        public ExtractValues visitValueWithVariable(GraphqlParser.ValueWithVariableContext ctx) {
-            ExtractValue extractValue = new ExtractValue(variables);
-            extractValue.visitValueWithVariable(ctx);
-            values.add(extractValue.value);
-            return this;
-        }
-
     }
 
     public static class ExtractName extends GraphqlBaseVisitor<ExtractName> {
@@ -200,8 +259,13 @@ public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
         public ExtractSelection visitArguments(GraphqlParser.ArgumentsContext ctx) {
             LOGGER.debug("visitArguments " + ctx.getText());
             MutableGlob mutableGlob = trees.element().getArguments();
-            Arguments arguments = new Arguments(mutableGlob, variables);
-            arguments.visitArguments(ctx);
+            final StringBuilder stringBuilder = new StringBuilder();
+            JsonBuilder jsonBuilder = new JsonBuilder(variables, stringBuilder);
+//            Arguments arguments = new Arguments(mutableGlob, variables);
+            jsonBuilder.visitArguments(ctx);
+            final String s = stringBuilder.toString();
+            LOGGER.info("Gson " + s);
+            GSonUtils.decode(new StringReader(s), mutableGlob.getType(), mutableGlob);
             return this;
         }
 

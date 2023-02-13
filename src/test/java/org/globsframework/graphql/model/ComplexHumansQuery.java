@@ -9,6 +9,8 @@ import org.globsframework.metamodel.fields.StringField;
 public class ComplexHumansQuery {
     public static GlobType TYPE;
 
+    public static StringField who;
+
     @Target(Subinfo.class)
     public static GlobField subInfo;
 
