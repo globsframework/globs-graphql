@@ -51,11 +51,19 @@ public class GQLGlobSelection extends GqlGlobBuilderWithError {
                     }
 
                     public void visitGlob(GlobField field) throws Exception {
-                        f = outputTypeBuilder.declareGlobField(alias, gqlField.gqlGlobType().outputType, field.streamAnnotations().collect(Collectors.toList()));
+                        final GQLGlobType gqlGlobType = gqlField.gqlGlobType();
+                        if (gqlGlobType == null) {
+                            throw new RuntimeException("Missing attribute under " + fieldName);
+                        }
+                        f = outputTypeBuilder.declareGlobField(alias, gqlGlobType.outputType, field.streamAnnotations().collect(Collectors.toList()));
                     }
 
                     public void visitGlobArray(GlobArrayField field) throws Exception {
-                        f = outputTypeBuilder.declareGlobArrayField(alias, gqlField.gqlGlobType().outputType, field.streamAnnotations().collect(Collectors.toList()));
+                        final GQLGlobType gqlGlobType = gqlField.gqlGlobType();
+                        if (gqlGlobType == null) {
+                            throw new RuntimeException("Missing attribute under " + fieldName);
+                        }
+                        f = outputTypeBuilder.declareGlobArrayField(alias, gqlGlobType.outputType, field.streamAnnotations().collect(Collectors.toList()));
                     }
 
                     public void visitUnionGlob(GlobUnionField field) throws Exception {

@@ -41,6 +41,9 @@ public class Node {
                     out.set(field.asStringField(), field.getGlobType().getName());
                 }
                 else {
+                    if (data == null) {
+                        return;
+                    }
                     GQLGlobFieldMapper gqlGlobFieldMapper = gqlGlobCallerBuilder.get(qglFieldWithParameter.field().field(), data.getType());
                     gqlGlobFieldMapper.update(data, new AbstractFieldSetter<>() {
                         @Override
@@ -65,7 +68,11 @@ public class Node {
                             final Field sort = p.getType().findField("sort");
                             if (sort != null) {
                                 final String s = p.get(sort.asStringField(), "");
-                                final Field field1 = nodes.get(0).data.getType().getField(s);
+                                final Glob data1 = nodes.get(0).data;
+                                if (data1 == null) {
+                                    return Comparator.naturalOrder();
+                                }
+                                final Field field1 = data1.getType().getField(s);
                                 final Comparator comparing = Comparator.comparing((Node o) -> ((Comparable) o.data.getValue(field1)));
                                 return comparing;
                             }
