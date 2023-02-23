@@ -45,6 +45,9 @@ public class GQLDbUtils {
                 keyOnLoadMap.put(parent.key().get(fKeyField), parent);
             }
         }
+        if (keyOnLoadMap.isEmpty()) {
+            return;
+        }
         final Constraint in = Constraints.in(dbKeyField, keyOnLoadMap.keySet());
         final SelectQuery query = db.getQueryBuilder(dbKeyField.getGlobType(), Constraints.and(additionalConstraint, in))
                 .selectAll()
