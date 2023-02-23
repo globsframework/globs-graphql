@@ -28,6 +28,13 @@ scalar Date
 scalar DateTime
 scalar Long
 """));
+        Assert.assertTrue(
+                s.contains("""
+schema  {
+query : Query
+mutation : Mutation
+}
+"""));
         Assert.assertTrue(s.contains("""
 type Query {
 humain(id:String) : human

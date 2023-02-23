@@ -24,12 +24,14 @@ import java.util.*;
 import static graphql.schema.idl.RuntimeWiring.newRuntimeWiring;
 
 public class GlobSchemaGenerator {
+    private final GlobType schemaType;
     private final GlobModel parameters;
     private final Set<GlobType> types = new LinkedHashSet<>();
     private final Set<GlobType> input = new LinkedHashSet<>();
     private final Map<String, String[]> enums = new HashMap<>();
 
     public GlobSchemaGenerator(GlobType schemaType, GlobModel parameters) {
+        this.schemaType = schemaType;
         this.parameters = parameters;
         for (GlobType parameter : parameters) {
             addChildInput(parameter);
@@ -91,12 +93,14 @@ public class GlobSchemaGenerator {
             }
             stringBuilder.append("}\n");
         }
+        stringBuilder.append(generate(schemaType, "schema ", false));
+        stringBuilder.append("\n\n");
         for (GlobType type : types) {
-            stringBuilder.append(generate(type, "type "));
+            stringBuilder.append(generate(type, "type ", true));
             stringBuilder.append("\n\n");
         }
         for (GlobType type : input) {
-            stringBuilder.append(generate(type, "input "));
+            stringBuilder.append(generate(type, "input ", true));
             stringBuilder.append("\n\n");
         }
         return stringBuilder.toString();
@@ -142,10 +146,13 @@ public class GlobSchemaGenerator {
         }
     }
 
-    String generate(GlobType type, String graphqlType) {
+    String generate(GlobType type, String graphqlType, boolean outputType) {
         StringBuilder desc = new StringBuilder();
         desc.append(graphqlType);
-        desc.append(type.getName()).append(" {\n");
+        if (outputType) {
+            desc.append(type.getName());
+        }
+        desc.append(" {\n");
         for (Field field : type.getFields()) {
             desc.append(FieldNameAnnotationType.getName(field));
             Optional<Glob> typeParameters = field.findOptAnnotation(GQLQueryParam.KEY);
