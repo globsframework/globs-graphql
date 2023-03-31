@@ -126,7 +126,7 @@ public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
             ExtractName extractName = new ExtractName();
             extractName.visitVariable(ctx);
             if (!variables.containsKey(extractName.name)) {
-                throw new RuntimeException("No value for variable " + extractName.name);
+                throw new RuntimeException("No value for variable " + extractName.name + " legal in graphql but not managed here.");
             }
             stringBuilder.append(variables.get(extractName.name));
             return this;

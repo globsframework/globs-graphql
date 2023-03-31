@@ -163,21 +163,43 @@ public class GQLGlobCallerBuilderTest extends TestCase {
         }
         {
             final CompletableFuture<Glob> id1 = gqlGlobCaller.query("query toto {" +
-                    "   humain(id: $ID) {" +
-                    "     firstName" +
-                    "     lastName" +
-                    "     birthDate {" +
-                    "       year" +
-                    "     }" +
-                    "     friends(sort: \"lastName\" name: [\"AA\", \"BB\"]) {" +
-                    "        firstName" +
-                    "        friends(sort: \"lastName\") {" +
-                    "           firstName" +
-                    "           lastName" +
-                    "        }" +
-                    "     }" +
-                    "   }" +
-                    "}", Map.of("ID", "\"AZE\""), null);
+                                                                    "   humain(id: $ID) {" +
+                                                                    "     firstName" +
+                                                                    "     lastName" +
+                                                                    "     birthDate {" +
+                                                                    "       year" +
+                                                                    "     }" +
+                                                                    "     friends(sort: \"lastName\", name: [\"AA\", \"BB\"]) {" +
+                                                                    "        firstName" +
+                                                                    "        friends(sort: \"lastName\") {" +
+                                                                    "           firstName" +
+                                                                    "           lastName" +
+                                                                    "        }" +
+                                                                    "     }" +
+                                                                    "   }" +
+                                                                    "}", Map.of("ID", "\"AZE\""), null);
+            Glob query = id1.join();
+
+            Assert.assertEquals("{\"humain\":{\"firstName\":\"LA\",\"lastName\":\"GG\",\"birthDate\":{\"year\":1980},\"friends\":[{\"firstName\":\"DSS\"},{\"firstName\":\"DDD\",\"friends\":[{\"firstName\":\"DSS\",\"lastName\":\"GCW\"}]}]}}",
+                    GSonUtils.encode(query, false));
+        }
+        {
+            final CompletableFuture<Glob> id1 = gqlGlobCaller.query("query toto {" +
+                                                                    "   humain(id: $ID) {" +
+                                                                    "     firstName" +
+                                                                    "     lastName" +
+                                                                    "     birthDate {" +
+                                                                    "       year" +
+                                                                    "     }" +
+                                                                    "     friends(sort: \"lastName\" name: [$V1, \"BB\"]) {" +
+                                                                    "        firstName" +
+                                                                    "        friends(sort: \"lastName\") {" +
+                                                                    "           firstName" +
+                                                                    "           lastName" +
+                                                                    "        }" +
+                                                                    "     }" +
+                                                                    "   }" +
+                                                                    "}", Map.of("ID", "\"AZE\"", "V1", "\"AA\""), null);
             Glob query = id1.join();
 
             Assert.assertEquals("{\"humain\":{\"firstName\":\"LA\",\"lastName\":\"GG\",\"birthDate\":{\"year\":1980},\"friends\":[{\"firstName\":\"DSS\"},{\"firstName\":\"DDD\",\"friends\":[{\"firstName\":\"DSS\",\"lastName\":\"GCW\"}]}]}}",
