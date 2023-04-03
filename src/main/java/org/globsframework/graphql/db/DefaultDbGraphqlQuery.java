@@ -1,6 +1,7 @@
 package org.globsframework.graphql.db;
 
 import org.globsframework.graphql.GQLGlobCallerBuilder;
+import org.globsframework.json.GSonUtils;
 import org.globsframework.metamodel.Field;
 import org.globsframework.model.Glob;
 import org.globsframework.sqlstreams.SelectBuilder;
@@ -102,7 +103,7 @@ public class DefaultDbGraphqlQuery implements DbGraphqlQuery {
             }
             skip.map(queryBuilder::skip);
             SelectQuery query = queryBuilder.selectAll().getQuery();
-            final CountConsumer<Glob> count = new CountConsumer<>(top.orElse(-1), consumer);
+            final CountConsumer count = new CountConsumer(top.orElse(-1), consumer, idField);
             query.executeAsGlobStream().forEach(count);
             boolean hasNext = top.map(m -> m + 1 == count.count).orElse(false);
             return new CursorPosition(count.count != 0 && hasPrevious, hasNext);
@@ -113,20 +114,27 @@ public class DefaultDbGraphqlQuery implements DbGraphqlQuery {
         }
     }
 
-    public static class CountConsumer<T> implements Consumer<T> {
+    public static class CountConsumer implements Consumer<Glob> {
         int count = 0;
         private int maxCount;
-        private Consumer<T> next;
+        private Consumer<Glob> next;
+        private Field idField;
 
-        public CountConsumer(int maxCount, Consumer<T> next) {
+        public CountConsumer(int maxCount, Consumer<Glob> next, Field idField) {
             this.maxCount = maxCount;
             this.next = next;
+            this.idField = idField;
         }
 
-        public void accept(T t) {
+        public void accept(Glob t) {
             ++count;
             if (maxCount == -1 || count <= maxCount) {
                 next.accept(t);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("push " + GSonUtils.encode(t, true));
+                } else if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("push " + t.getValue(idField));
+                }
             }
         }
     }
