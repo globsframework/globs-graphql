@@ -60,11 +60,16 @@ public class DefaultDbGraphqlQuery implements DbGraphqlQuery {
                         final String value = afterValue.get();
                         final Object convertedValue = GQLGlobCallerBuilder.ToStringSerialiser.toObject(field, value);
                         if (wantedOrder.isEmpty() || wantedOrder.get() == Order.asc) {
-                            constraint = Constraints.and(Constraints.strictlyGreater(idField, after.get().id()),
-                                    Constraints.greaterUnchecked(field, convertedValue));
+                            constraint = Constraints.or(
+                                    Constraints.and(Constraints.equalsObject(field, convertedValue),
+                                            Constraints.strictlyGreater(idField, after.get().id())),
+                                    Constraints.and(Constraints.strictlyGreater(field, convertedValue))
+                            );
                         } else {
-                            constraint = Constraints.and(Constraints.strictlyLessUnchecked(idField, after.get().id()),
-                                    Constraints.lessUncheck(field, convertedValue));
+                            constraint = Constraints.or(
+                                    Constraints.and(Constraints.equalsObject(field, convertedValue),
+                                            Constraints.strictlyLessUnchecked(idField, after.get().id())),
+                                    Constraints.and(Constraints.strictlyLessUnchecked(field, convertedValue)));
                         }
                     } else {
                         if (wantedOrder.isEmpty() || wantedOrder.get() == Order.asc) {
