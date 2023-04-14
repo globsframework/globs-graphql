@@ -81,7 +81,7 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
     public static class ToStringSerialiser {
 
         public static String toString(Field field, FieldValuesAccessor value) {
-            if (value == null) {
+            if (value == null || value.isNull(field)) {
                 return null;
             }
             final Ref<String> context = new Ref<>();
@@ -90,7 +90,7 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
         }
 
         public static Object toObject(Field field, String value) {
-            if (value == null) {
+            if (value == null ) {
                 return null;
             }
             final Ref<Object> ctx2 = new Ref<>();
