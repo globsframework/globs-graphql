@@ -91,6 +91,10 @@ public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
         }
     }
 
+    public static class MissingVariable extends RuntimeException {
+    }
+
+
     public static class JsonBuilder extends GraphqlBaseVisitor<JsonBuilder> {
         Deque<State> states = new ArrayDeque<>();
         final Map<String, String> variables;
@@ -112,34 +116,58 @@ public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
         }
 
         public JsonBuilder visitArgument(GraphqlParser.ArgumentContext ctx) {
+            boolean previous =  states.element().isFirst;
+            int len = stringBuilder.length();
             if (!states.element().isFirst) {
                 stringBuilder.append(",");
             }
             states.element().isFirst = false;
-            states.push(states.element().onArgument());
-            final JsonBuilder jsonBuilder = super.visitArgument(ctx);
-            states.pop();
-            return jsonBuilder;
+            final JsonBuilder jsonBuilder;
+            try {
+                states.push(states.element().onArgument());
+                jsonBuilder = super.visitArgument(ctx);
+                states.pop();
+                return jsonBuilder;
+            } catch (MissingVariable e) {
+                stringBuilder.delete(len, stringBuilder.length());
+                states.pop();
+                states.element().isFirst = previous;
+            }
+            return this;
         }
 
         public JsonBuilder visitVariable(GraphqlParser.VariableContext ctx) {
             ExtractName extractName = new ExtractName();
             extractName.visitVariable(ctx);
             if (!variables.containsKey(extractName.name)) {
-                throw new RuntimeException("No value for variable " + extractName.name + " legal in graphql but not managed here.");
+                final String msg = "No value for variable " + extractName.name + " legal in graphql but not managed here.";
+                LOGGER.warn(msg);
+                throw new MissingVariable();
             }
             stringBuilder.append(variables.get(extractName.name));
             return this;
         }
 
         public JsonBuilder visitValueWithVariable(GraphqlParser.ValueWithVariableContext ctx) {
+            boolean previous = states.element().isFirst;
+            int len = stringBuilder.length();
             if (!states.element().isFirst) {
                 stringBuilder.append(",");
             }
             states.element().isFirst = false;
             states.push(states.element().onValue());
-            super.visitValueWithVariable(ctx);
-            states.pop();
+            try {
+                super.visitValueWithVariable(ctx);
+                states.pop();
+            } catch (MissingVariable e) {
+                stringBuilder.delete(len, stringBuilder.length());
+                states.pop();
+                states.element().isFirst = previous;
+                if (states.element().isArray) {
+                    return this;
+                }
+                throw e;
+            }
             return this;
         }
 
@@ -152,14 +180,22 @@ public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
 
         @Override
         public JsonBuilder visitObjectFieldWithVariable(GraphqlParser.ObjectFieldWithVariableContext ctx) {
+            boolean previous = states.element().isFirst;
+            int len = stringBuilder.length();
             if (!states.element().isFirst) {
                 stringBuilder.append(",");
             }
             states.element().isFirst = false;
             states.push(states.element().onObject());
-            final JsonBuilder jsonBuilder = super.visitObjectFieldWithVariable(ctx);
+            try {
+                super.visitObjectFieldWithVariable(ctx);
+            } catch (MissingVariable e) {
+                states.pop();
+                stringBuilder.delete(len, stringBuilder.length());
+                states.element().isFirst = previous;
+            }
             states.pop();
-            return jsonBuilder;
+            return this;
         }
 
         public JsonBuilder visitObjectValueWithVariable(GraphqlParser.ObjectValueWithVariableContext ctx) {

@@ -103,6 +103,8 @@ public class GQLGlobCallerBuilderTest extends TestCase {
             }
         });
 
+//        gqlGlobCallerBuilder.registerLoader();
+
         gqlGlobCallerBuilder.registerFKeyExtractor(Human.friends, id.getGlobType(), new GQLKeyExtractor<>() {
             @Override
             public CompletableFuture<Void> extract(GqlField gqlField, GQLGlobCaller.GQLContext callContext, List<OnExtract> parents) {

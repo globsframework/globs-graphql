@@ -5,11 +5,9 @@ import org.globsframework.graphql.model.*;
 import org.globsframework.graphql.parser.GqlField;
 import org.globsframework.json.GSonUtils;
 import org.globsframework.metamodel.impl.DefaultGlobModel;
-import org.globsframework.model.Glob;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 public class GQLQueryParserTest extends TestCase {
 
@@ -59,6 +57,22 @@ public class GQLQueryParserTest extends TestCase {
         }
     }
 
+    public void testWithArrayAndEmptyVariable() {
+        GQLQueryParser gqlQueryParser = new GQLQueryParser(SchemaType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, CreateParam.TYPE, ComplexHumansQuery.TYPE, Human.FriendQueryParam.TYPE));
+        {
+            final GQLGlobType type = gqlQueryParser.parse("query toto {" +
+                                                          "  humain{" +
+                                                          "     friends(sort: \"lastName\" name: [$AAA,\"b\"]) {" +
+                                                          "        firstName" +
+                                                          "     }" +
+                                                          "   }" +
+                                                          "  }" +
+                                                          "}", Map.of());
+            final Collection<GqlField> values = type.aliasToField.values();
+        }
+    }
+
+
     public void testWithQuery() {
         GQLQueryParser gqlQueryParser = new GQLQueryParser(SchemaType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE));
         GQLGlobType parse = gqlQueryParser.parse("query {" +
@@ -87,6 +101,31 @@ public class GQLQueryParserTest extends TestCase {
 
     }
 
+    public void testWithEmptyVariableInQueryIsOK() {
+        GQLQueryParser gqlQueryParser = new GQLQueryParser(SchemaType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, ComplexHumansQuery.TYPE));
+        GQLGlobType parse = gqlQueryParser.parse("""
+                query {
+                   complexHumains(subInfo: $VAR) {
+                     totalCount
+                   }
+                }
+                """, Map.of());
+
+    }
+
+    public void testWithComplexInParamAndEmptyVar() {
+        GQLQueryParser gqlQueryParser = new GQLQueryParser(SchemaType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, ComplexHumansQuery.TYPE));
+        ;
+        GQLGlobType parse = gqlQueryParser.parse("""
+                query {
+                   complexHumains(who: "chat", subInfo: { firstName: $VAR, lastName: "toto" }) {
+                     totalCount
+                   }
+                }
+                """
+                , Map.of());
+    }
+
     public void testWithComplexInParam() {
         GQLQueryParser gqlQueryParser = new GQLQueryParser(SchemaType.TYPE, new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, ComplexHumansQuery.TYPE));
         final String titi = GSonUtils.encode(ComplexHumansQuery.TYPE.instantiate()
@@ -99,7 +138,7 @@ public class GQLQueryParserTest extends TestCase {
                      totalCount
                    }
                 }
-                """.replace("VAR", titi.replace("\"", "\\\""))
+                """
                 , Map.of());
     }
 /*

@@ -18,6 +18,9 @@ public class Human {
 
     public static StringField lastName;
 
+    // try to add a loader that can execute a query only for this attribut
+//    public static BooleanField hasFriend;
+
     @Target(BirthDate.class)
     public static GlobField birthDate;
 
