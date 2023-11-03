@@ -1,7 +1,7 @@
 package org.globsframework.graphql.parser;
 
-import graphql.parser.antlr.GraphqlBaseVisitor;
-import graphql.parser.antlr.GraphqlParser;
+import org.globsframework.graphql.parser.antlr.GraphqlBaseVisitor;
+import org.globsframework.graphql.parser.antlr.GraphqlParser;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.globsframework.graphql.GQLGlobType;
 import org.globsframework.json.GSonUtils;

@@ -1,14 +1,5 @@
 package org.globsframework.graphql;
 
-import graphql.ExecutionResult;
-import graphql.GraphQL;
-import graphql.scalar.GraphqlStringCoercing;
-import graphql.schema.GraphQLScalarType;
-import graphql.schema.GraphQLSchema;
-import graphql.schema.idl.RuntimeWiring;
-import graphql.schema.idl.SchemaGenerator;
-import graphql.schema.idl.SchemaParser;
-import graphql.schema.idl.TypeDefinitionRegistry;
 import org.globsframework.graphql.model.GQLMandatory;
 import org.globsframework.graphql.model.GQLQueryParam;
 import org.globsframework.graphql.model.GraphqlEnum;
@@ -20,8 +11,6 @@ import org.globsframework.metamodel.fields.*;
 import org.globsframework.model.Glob;
 
 import java.util.*;
-
-import static graphql.schema.idl.RuntimeWiring.newRuntimeWiring;
 
 public class GlobSchemaGenerator {
     private final GlobType schemaType;
@@ -39,18 +28,18 @@ public class GlobSchemaGenerator {
         loopType(schemaType);
     }
 
-    private void check() {
-        String schema = generateAll();
-
-        SchemaParser schemaParser = new SchemaParser();
-        TypeDefinitionRegistry typeDefinitionRegistry = schemaParser.parse(schema);
-        RuntimeWiring runtimeWiring = newRuntimeWiring()
-                .scalar(GraphQLScalarType.newScalar().name("Date")
-                        .coercing(new GraphqlStringCoercing())
-                        .build())
-                .scalar(GraphQLScalarType.newScalar().name("DateTime")
-                        .coercing(new GraphqlStringCoercing())
-                        .build())
+//    private void check() {
+//        String schema = generateAll();
+//
+//        SchemaParser schemaParser = new SchemaParser();
+//        TypeDefinitionRegistry typeDefinitionRegistry = schemaParser.parse(schema);
+//        RuntimeWiring runtimeWiring = newRuntimeWiring()
+//                .scalar(GraphQLScalarType.newScalar().name("Date")
+//                        .coercing(new GraphqlStringCoercing())
+//                        .build())
+//                .scalar(GraphQLScalarType.newScalar().name("DateTime")
+//                        .coercing(new GraphqlStringCoercing())
+//                        .build())
 //                .scalar(GraphQLScalarType.newScalar().name("Long")
 //                        .coercing(new Coercing<Long, Long>() {
 //                            @Override
@@ -70,16 +59,16 @@ public class GlobSchemaGenerator {
 //                        })
 //                        .build())
 //                    .type("Query", builder -> builder.dataFetcher("hello", new StaticDataFetcher("world")))
-                .build();
-
-        SchemaGenerator schemaGenerator = new SchemaGenerator();
-        GraphQLSchema graphQLSchema = schemaGenerator.makeExecutableSchema(typeDefinitionRegistry, runtimeWiring);
-
-        GraphQL build = GraphQL.newGraphQL(graphQLSchema).build();
-        ExecutionResult executionResult = build.execute("{}");
-
-        System.out.println(executionResult.getData().toString());
-    }
+//                .build();
+//
+//        SchemaGenerator schemaGenerator = new SchemaGenerator();
+//        GraphQLSchema graphQLSchema = schemaGenerator.makeExecutableSchema(typeDefinitionRegistry, runtimeWiring);
+//
+//        GraphQL build = GraphQL.newGraphQL(graphQLSchema).build();
+//        ExecutionResult executionResult = build.execute("{}");
+//
+//        System.out.println(executionResult.getData().toString());
+//    }
 
     public String generateAll() {
         StringBuilder stringBuilder = new StringBuilder();

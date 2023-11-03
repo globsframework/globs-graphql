@@ -1,19 +1,9 @@
 package org.globsframework.graphql;
 
-import graphql.GraphQL;
-import graphql.scalar.GraphqlStringCoercing;
-import graphql.schema.*;
-import graphql.schema.idl.RuntimeWiring;
-import graphql.schema.idl.SchemaGenerator;
-import graphql.schema.idl.SchemaParser;
-import graphql.schema.idl.TypeDefinitionRegistry;
 import junit.framework.TestCase;
 import org.globsframework.graphql.model.*;
 import org.globsframework.metamodel.impl.DefaultGlobModel;
-import org.globsframework.model.Glob;
 import org.junit.Assert;
-
-import static graphql.schema.idl.RuntimeWiring.newRuntimeWiring;
 
 public class GlobSchemaGeneratorTest extends TestCase {
 
@@ -99,58 +89,58 @@ lastName : String
 """));
     }
 
-    public void testQuery() {
-        GlobSchemaGenerator globSchemaGenerator = new GlobSchemaGenerator(SchemaType.TYPE,
-                new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, Human.FriendQueryParam.TYPE, CreateParam.TYPE, ComplexHumansQuery.TYPE));
-
-        SchemaParser schemaParser = new SchemaParser();
-        TypeDefinitionRegistry typeDefinitionRegistry = schemaParser.parse(globSchemaGenerator.generateAll());
-
-        GraphQLCodeRegistry.Builder newCodeRegistryBuilder = GraphQLCodeRegistry.newCodeRegistry();
-        GraphQLCodeRegistry codeRegistry = newCodeRegistryBuilder
-                .defaultDataFetcher(environment -> {
-                    GraphQLFieldDefinition fieldDefinition = environment.getFieldDefinition();
-                    String name = fieldDefinition.getName();
-                    return environment1 -> {
-                        Glob glob = environment1.getSource();
-                        return glob.getValue(glob.getType().getField(name));
-                    };
-                }).build();
-
-        RuntimeWiring runtimeWiring = newRuntimeWiring()
-                .codeRegistry(codeRegistry)
-                .scalar(GraphQLScalarType.newScalar().name("Date")
-                        .coercing(new GraphqlStringCoercing())
-                        .build())
-                .scalar(GraphQLScalarType.newScalar().name("DateTime")
-                        .coercing(new GraphqlStringCoercing())
-                        .build())
-                .scalar(GraphQLScalarType.newScalar().name("Long")
-                        .coercing(new GraphqlStringCoercing())
-                        .build())
-                .type("Query", builder ->
-                        builder.dataFetcher(QueryType.humains.getName(), new DataFetcher() {
-                            @Override
-                            public Object get(DataFetchingEnvironment environment) throws Exception {
-                                return null;
-                            }
-                        }))
-                .build();
-
-        SchemaGenerator schemaGenerator = new SchemaGenerator();
-        GraphQLSchema graphQLSchema = schemaGenerator.makeExecutableSchema(typeDefinitionRegistry, runtimeWiring);
-
-        GraphQL graphQL = GraphQL.newGraphQL(graphQLSchema).build();
-        graphQL.execute("{" +
-                "  humains {" +
-                "    edges {" +
-                "     node {" +
-                "        firstName" +
-                "        lastName" +
-                "     }" +
-                "   }" +
-                "  }" +
-                "}");
-    }
+//    public void testQuery() {
+//        GlobSchemaGenerator globSchemaGenerator = new GlobSchemaGenerator(SchemaType.TYPE,
+//                new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, Human.FriendQueryParam.TYPE, CreateParam.TYPE, ComplexHumansQuery.TYPE));
+//
+//        SchemaParser schemaParser = new SchemaParser();
+//        TypeDefinitionRegistry typeDefinitionRegistry = schemaParser.parse(globSchemaGenerator.generateAll());
+//
+//        GraphQLCodeRegistry.Builder newCodeRegistryBuilder = GraphQLCodeRegistry.newCodeRegistry();
+//        GraphQLCodeRegistry codeRegistry = newCodeRegistryBuilder
+//                .defaultDataFetcher(environment -> {
+//                    GraphQLFieldDefinition fieldDefinition = environment.getFieldDefinition();
+//                    String name = fieldDefinition.getName();
+//                    return environment1 -> {
+//                        Glob glob = environment1.getSource();
+//                        return glob.getValue(glob.getType().getField(name));
+//                    };
+//                }).build();
+//
+//        RuntimeWiring runtimeWiring = newRuntimeWiring()
+//                .codeRegistry(codeRegistry)
+//                .scalar(GraphQLScalarType.newScalar().name("Date")
+//                        .coercing(new GraphqlStringCoercing())
+//                        .build())
+//                .scalar(GraphQLScalarType.newScalar().name("DateTime")
+//                        .coercing(new GraphqlStringCoercing())
+//                        .build())
+//                .scalar(GraphQLScalarType.newScalar().name("Long")
+//                        .coercing(new GraphqlStringCoercing())
+//                        .build())
+//                .type("Query", builder ->
+//                        builder.dataFetcher(QueryType.humains.getName(), new DataFetcher() {
+//                            @Override
+//                            public Object get(DataFetchingEnvironment environment) throws Exception {
+//                                return null;
+//                            }
+//                        }))
+//                .build();
+//
+//        SchemaGenerator schemaGenerator = new SchemaGenerator();
+//        GraphQLSchema graphQLSchema = schemaGenerator.makeExecutableSchema(typeDefinitionRegistry, runtimeWiring);
+//
+//        GraphQL graphQL = GraphQL.newGraphQL(graphQLSchema).build();
+//        graphQL.execute("{" +
+//                "  humains {" +
+//                "    edges {" +
+//                "     node {" +
+//                "        firstName" +
+//                "        lastName" +
+//                "     }" +
+//                "   }" +
+//                "  }" +
+//                "}");
+//    }
 
 }

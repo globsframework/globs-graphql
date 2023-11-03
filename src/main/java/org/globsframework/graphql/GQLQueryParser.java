@@ -1,7 +1,7 @@
 package org.globsframework.graphql;
 
-import graphql.parser.antlr.GraphqlLexer;
-import graphql.parser.antlr.GraphqlParser;
+import org.globsframework.graphql.parser.antlr.GraphqlLexer;
+import org.globsframework.graphql.parser.antlr.GraphqlParser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;

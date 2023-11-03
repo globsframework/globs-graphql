@@ -57,6 +57,30 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-maven-plugin</artifactId>
+                <version>4.13.0</version>
+                <configuration>
+                    <sourceDirectory>${basedir}/src/main/resources/</sourceDirectory>
+                    <outputDirectory>${basedir}/target/generated-sources/antlr4/org/globsframework/graphql/parser/antlr/</outputDirectory>
+                    <includes>
+                        <include>Graphql.g4</include>
+<!--                        <include>GraphqlCommon.g4</include>-->
+<!--                        <include>GraphqlOperation.g4</include>-->
+<!--                        <include>GraphqlSDL.g4</include>-->
+                    </includes>
+                    <visitor>true</visitor>
+                    <listener>true</listener>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>antlr4</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -76,16 +100,16 @@
             <artifactId>globs-sql</artifactId>
             <version>3.3-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>com.graphql-java</groupId>
-            <artifactId>graphql-java</artifactId>
-            <version>18.2</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.graphql-java</groupId>-->
+<!--            <artifactId>graphql-java</artifactId>-->
+<!--            <version>18.2</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
-            <version>4.9.3</version>
+            <version>4.13.0</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
