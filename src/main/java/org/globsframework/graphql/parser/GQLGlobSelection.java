@@ -1,7 +1,7 @@
 package org.globsframework.graphql.parser;
 
 import org.globsframework.graphql.GQLGlobType;
-import org.globsframework.metamodel.Field;
+import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.GlobModel;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.GlobTypeBuilder;

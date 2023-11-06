@@ -3,7 +3,7 @@ package org.globsframework.graphql;
 import org.globsframework.graphql.model.GQLMandatory;
 import org.globsframework.graphql.model.GQLQueryParam;
 import org.globsframework.graphql.model.GraphqlEnum;
-import org.globsframework.metamodel.Field;
+import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.GlobModel;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.annotations.FieldNameAnnotationType;

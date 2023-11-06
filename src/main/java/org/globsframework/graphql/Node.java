@@ -1,7 +1,7 @@
 package org.globsframework.graphql;
 
 import org.globsframework.graphql.model.GQLMandatory;
-import org.globsframework.metamodel.Field;
+import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.fields.GlobArrayField;
 import org.globsframework.metamodel.fields.GlobField;

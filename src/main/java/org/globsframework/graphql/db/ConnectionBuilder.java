@@ -2,7 +2,7 @@ package org.globsframework.graphql.db;
 
 import org.globsframework.graphql.GQLGlobConnectionLoad;
 import org.globsframework.graphql.parser.GqlField;
-import org.globsframework.metamodel.Field;
+import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.fields.IntegerField;
 import org.globsframework.metamodel.fields.StringField;
 import org.globsframework.model.Glob;

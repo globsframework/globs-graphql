@@ -1,7 +1,7 @@
 package org.globsframework.graphql;
 
 import org.globsframework.graphql.parser.GqlField;
-import org.globsframework.metamodel.Field;
+import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.GlobType;
 
 import java.util.Map;

@@ -2,7 +2,7 @@ package org.globsframework.graphql.db;
 
 import org.globsframework.graphql.GQLGlobCallerBuilder;
 import org.globsframework.json.GSonUtils;
-import org.globsframework.metamodel.Field;
+import org.globsframework.metamodel.fields.Field;
 import org.globsframework.model.Glob;
 import org.globsframework.sqlstreams.SelectBuilder;
 import org.globsframework.sqlstreams.SelectQuery;

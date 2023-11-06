@@ -1,6 +1,6 @@
 package org.globsframework.graphql;
 
-import org.globsframework.metamodel.Field;
+import org.globsframework.metamodel.fields.Field;
 import org.globsframework.model.FieldSetter;
 import org.globsframework.model.Glob;
 
