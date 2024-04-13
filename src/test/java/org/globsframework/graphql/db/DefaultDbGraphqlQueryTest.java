@@ -38,8 +38,8 @@ public class DefaultDbGraphqlQueryTest {
         final int dbLine = 1000;
         for (int i = 0; i < dbLine; i++) {
             data.add(DbHumain.TYPE.instantiate()
-                    .set(DbHumain.uuid, "id:" + i)
-                    .set(DbHumain.firstName, "name_" + i)
+                    .set(DbHumain.uuid, "" + i)
+                    .set(DbHumain.firstName, "firstName " + ((i % 100) + 1))
                     .set(DbHumain.lastName, "lastName " + i));
         }
         final JdbcConnection db = sqlService.getDb();
@@ -103,7 +103,7 @@ public class DefaultDbGraphqlQueryTest {
 
     private static CompletableFuture<Glob> query(GQLGlobCaller<GQLGlobCaller.GQLContext> build, String after, String before) {
         final CompletableFuture<Glob> query = build.query("{" +
-                        "  humains(first: 2, after: $after, before: $before) {" +
+                        "  humains(first: 2, after: $after, before: $before, orderBy: firstName) {" +
                         "    totalCount" +
                         "    edges {" +
                         "      node {" +
