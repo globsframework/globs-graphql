@@ -39,9 +39,10 @@ public class DefaultDbGraphqlQuery implements DbGraphqlQuery {
         final SelectBuilder queryBuilder = db.getQueryBuilder(idField.getGlobType(), additionalConstraint);
         final LongAccessor count = queryBuilder.count(idField);
         try (SelectQuery selectQuery = queryBuilder.getQuery()) {
-            final Stream<?> stream = selectQuery.executeAsStream();
-            return stream.findFirst().map(g -> ((int) count.getValue(0)))
-                    .orElse(-1);
+            try (Stream<?> stream = selectQuery.executeAsStream()) {
+                return stream.findFirst().map(g -> ((int) count.getValue(0)))
+                        .orElse(-1);
+            }
         }
     }
 
@@ -109,7 +110,9 @@ public class DefaultDbGraphqlQuery implements DbGraphqlQuery {
             skip.map(queryBuilder::skip);
             SelectQuery query = queryBuilder.selectAll().getQuery();
             final CountConsumer count = new CountConsumer(top.orElse(-1), consumer, idField);
-            query.executeAsGlobStream().forEach(count);
+            try (Stream<Glob> globStream = query.executeAsGlobStream()) {
+                globStream.forEach(count);
+            }
             boolean hasNext = top.map(m -> m + 1 == count.count).orElse(false);
             return new CursorPosition(count.count != 0 && hasPrevious, hasNext);
         } catch (Exception e) {

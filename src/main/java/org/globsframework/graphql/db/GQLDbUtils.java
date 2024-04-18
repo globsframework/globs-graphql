@@ -11,6 +11,7 @@ import org.globsframework.sqlstreams.constraints.Constraints;
 import org.globsframework.utils.collections.MultiMap;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public class GQLDbUtils {
     public interface Cached {
@@ -52,13 +53,15 @@ public class GQLDbUtils {
         final SelectQuery query = db.getQueryBuilder(dbKeyField.getGlobType(), Constraints.and(additionalConstraint, in))
                 .selectAll()
                 .getQuery();
-        query.executeAsGlobStream().forEach(glob -> {
-            final String s = glob.get(dbKeyField);
-            final List<OnKey> onKeys = keyOnLoadMap.get(s);
-            for (OnKey onKey : onKeys) {
-                cached.push(onKey.key(), glob);
-                onKey.onNew().push(glob);
-            }
-        });
+        try (Stream<Glob> globStream = query.executeAsGlobStream()) {
+            globStream.forEach(glob -> {
+                final String s = glob.get(dbKeyField);
+                final List<OnKey> onKeys = keyOnLoadMap.get(s);
+                for (OnKey onKey : onKeys) {
+                    cached.push(onKey.key(), glob);
+                    onKey.onNew().push(glob);
+                }
+            });
+        }
     }
 }
