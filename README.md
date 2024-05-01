@@ -158,7 +158,7 @@ The last register it to managed connection with cursor and order.
 By declaring id and orderBy we allow the library to automatically create the next and previous field (in base64)
 The cursor give the information for hasNext/hasPrevious.
 
-The more realist query using db :
+A more realist query using db :
 ```
         gqlGlobCallerBuilder.registerConnection(HumainQuery.humains, new GQLGlobConnectionLoad<GQLGlobCaller.GQLContext>() {
             @Override
