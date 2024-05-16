@@ -19,12 +19,12 @@ import org.globsframework.metamodel.fields.IntegerField;
 import org.globsframework.metamodel.fields.StringField;
 import org.globsframework.metamodel.impl.DefaultGlobModel;
 import org.globsframework.model.Glob;
-import org.globsframework.model.GlobList;
 import org.globsframework.sqlstreams.drivers.jdbc.JdbcConnection;
 import org.globsframework.sqlstreams.drivers.jdbc.JdbcSqlService;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -34,7 +34,7 @@ public class DefaultDbGraphqlQueryTest {
     @Test
    public void name() {
         JdbcSqlService sqlService = new JdbcSqlService("jdbc:hsqldb:.", "sa", "");
-        GlobList data = new GlobList();
+        ArrayList<Glob> data = new ArrayList<>();
         final int dbLine = 1000;
         for (int i = 0; i < dbLine; i++) {
             data.add(DbHumain.TYPE.instantiate()
