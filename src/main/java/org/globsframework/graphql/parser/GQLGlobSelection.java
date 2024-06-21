@@ -43,7 +43,7 @@ public class GQLGlobSelection extends GqlGlobBuilderWithError {
             if (gqlField.field().field() == null) {
                 f = outputTypeBuilder.declare(alias, DataType.String, List.of());
             } else {
-                f = gqlField.field().field().safeVisit(new FieldVisitor.AbstractFieldVisitor() {
+                f = gqlField.field().field().safeAccept(new FieldVisitor.AbstractFieldVisitor() {
                     Field f;
 
                     public void notManaged(Field field) throws Exception {

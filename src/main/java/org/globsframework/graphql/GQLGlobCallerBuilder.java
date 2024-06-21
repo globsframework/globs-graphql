@@ -85,7 +85,7 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
                 return null;
             }
             final Ref<String> context = new Ref<>();
-            field.safeVisitValue(Obj2StrVisitor.STR_VISITOR, value, context);
+            field.safeAcceptValue(Obj2StrVisitor.STR_VISITOR, value, context);
             return context.get();
         }
 
@@ -94,7 +94,7 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
                 return null;
             }
             final Ref<Object> ctx2 = new Ref<>();
-            field.safeVisit(StrToObjectVisitor.STR_VISITOR, value, ctx2);
+            field.safeAccept(StrToObjectVisitor.STR_VISITOR, value, ctx2);
             return ctx2.get();
         }
 

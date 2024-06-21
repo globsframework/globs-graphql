@@ -151,7 +151,7 @@ public class GlobSchemaGenerator {
                 for (Field paramField : parametersType.getFields()) {
                     desc.append(FieldNameAnnotationType.getName(paramField))
                             .append(":");
-                    paramField.safeVisit(new ToGQLTypeVisitor(desc));
+                    paramField.safeAccept(new ToGQLTypeVisitor(desc));
                     if (paramField.hasAnnotation(GQLMandatory.KEY)) {
                         desc.append("!");
                     }
@@ -160,7 +160,7 @@ public class GlobSchemaGenerator {
                 desc.replace(desc.length() - 2, desc.length(), ")");
             });
             desc.append(" : ");
-            field.safeVisit(new ToGQLTypeVisitor(desc));
+            field.safeAccept(new ToGQLTypeVisitor(desc));
             if (field.hasAnnotation(GQLMandatory.KEY)) {
                 desc.append("!");
             }
