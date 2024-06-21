@@ -4,10 +4,10 @@ import org.globsframework.functional.FunctionalKey;
 import org.globsframework.graphql.OnKey;
 import org.globsframework.metamodel.fields.StringField;
 import org.globsframework.model.Glob;
-import org.globsframework.sqlstreams.SelectQuery;
-import org.globsframework.sqlstreams.SqlConnection;
-import org.globsframework.sqlstreams.constraints.Constraint;
-import org.globsframework.sqlstreams.constraints.Constraints;
+import org.globsframework.sql.SelectQuery;
+import org.globsframework.sql.SqlConnection;
+import org.globsframework.sql.constraints.Constraint;
+import org.globsframework.sql.constraints.Constraints;
 import org.globsframework.utils.collections.MultiMap;
 
 import java.util.List;

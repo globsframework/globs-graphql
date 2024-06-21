@@ -19,8 +19,8 @@ import org.globsframework.metamodel.fields.IntegerField;
 import org.globsframework.metamodel.fields.StringField;
 import org.globsframework.metamodel.impl.DefaultGlobModel;
 import org.globsframework.model.Glob;
-import org.globsframework.sqlstreams.drivers.jdbc.JdbcConnection;
-import org.globsframework.sqlstreams.drivers.jdbc.JdbcSqlService;
+import org.globsframework.sql.drivers.jdbc.JdbcConnection;
+import org.globsframework.sql.drivers.jdbc.JdbcSqlService;
 import org.junit.Assert;
 import org.junit.Test;
 

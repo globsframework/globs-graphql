@@ -6,8 +6,8 @@ import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.fields.IntegerField;
 import org.globsframework.metamodel.fields.StringField;
 import org.globsframework.model.Glob;
-import org.globsframework.sqlstreams.SqlConnection;
-import org.globsframework.sqlstreams.constraints.Constraint;
+import org.globsframework.sql.SqlConnection;
+import org.globsframework.sql.constraints.Constraint;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
