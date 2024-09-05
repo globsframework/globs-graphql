@@ -39,9 +39,10 @@ public class DefaultDbGraphqlQuery implements DbGraphqlQuery {
         final SelectBuilder queryBuilder = db.getQueryBuilder(idField.getGlobType(), additionalConstraint);
         final LongAccessor count = queryBuilder.count(idField);
         try (SelectQuery selectQuery = queryBuilder.getQuery()) {
-            final Stream<?> stream = selectQuery.executeAsStream();
-            return stream.findFirst().map(g -> ((int) count.getValue(0)))
-                    .orElse(-1);
+            try (Stream<?> stream = selectQuery.executeAsStream()) {
+                return stream.findFirst().map(g -> ((int) count.getValue(0)))
+                        .orElse(-1);
+            }
         }
     }
 

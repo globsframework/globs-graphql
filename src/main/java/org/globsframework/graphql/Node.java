@@ -33,7 +33,7 @@ public class Node {
         return node;
     }
 
-    public Glob buildResponse(GQLGlobCallerBuilder gqlGlobCallerBuilder) {
+    public Glob buildResponse(GQLGlobCallerBuilder<?> gqlGlobCallerBuilder) {
         MutableGlob out = glQuery.outputType.instantiate();
         glQuery.aliasToField.forEach((field, qglFieldWithParameter) -> {
             if (qglFieldWithParameter.gqlGlobType() == null) {
@@ -58,21 +58,22 @@ public class Node {
             if (gqlField.gqlGlobType() != null) {
                 List<Node> nodes = children.get(field);
                 if (!nodes.isEmpty()) {
-                    if (field instanceof GlobField) {
-                        out.set(((GlobField) field), nodes.get(0).buildResponse(gqlGlobCallerBuilder));
-                    } else if (field instanceof GlobArrayField) {
+                    Node firstNode = nodes.get(0);
+                    if (field instanceof GlobField globField) {
+                        out.set(globField, firstNode.buildResponse(gqlGlobCallerBuilder));
+                    } else if (field instanceof GlobArrayField globArrayField) {
                         Glob[] res = new Glob[nodes.size()];
                         final Optional<Glob> parameters = gqlField.field().parameters();
                         final Optional<Comparator> comparator =
                                 parameters.map(p -> {
                             final Field sort = p.getType().findField("sort");
                             if (sort != null) {
-                                final String s = p.get(sort.asStringField(), "");
-                                final Glob data1 = nodes.get(0).data;
+                                final Optional<String> s = p.getOptNotEmpty(sort.asStringField());
+                                final Glob data1 = firstNode.data;
                                 if (data1 == null) {
                                     return Comparator.naturalOrder();
                                 }
-                                final Field field1 = data1.getType().getField(s);
+                                final Field field1 = data1.getType().getField(s.orElse(null));
                                 final Comparator comparing = Comparator.comparing((Node o) -> ((Comparable) o.data.getValue(field1)));
                                 return comparing;
                             }
@@ -92,14 +93,14 @@ public class Node {
                                 res[i++] = node.buildResponse(gqlGlobCallerBuilder);
                             }
                         }
-                        out.set(field.asGlobArrayField(), res);
+                        out.set(globArrayField, res);
                     } else {
                         throw new RuntimeException("Not managed.");
                     }
                 }
                 else {
-                    if (field.hasAnnotation(GQLMandatory.KEY) && field instanceof GlobArrayField) {
-                        out.set(field.asGlobArrayField(), new Glob[0]);
+                    if (field.hasAnnotation(GQLMandatory.KEY) && field instanceof GlobArrayField globArrayField) {
+                        out.set(globArrayField, new Glob[0]);
                     }
                 }
             }
