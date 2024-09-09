@@ -11,6 +11,8 @@ public class GraphQlResponse {
     @IsJsonContentAnnotation
     public static StringField data;
 
+    public static StringField errorMessage;
+
     static {
         GlobTypeLoaderFactory.create(GraphQlResponse.class).load();
     }
