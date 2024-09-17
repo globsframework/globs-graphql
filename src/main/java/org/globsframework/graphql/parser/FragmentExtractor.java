@@ -19,7 +19,9 @@ public class FragmentExtractor extends GraphqlBaseVisitor<FragmentExtractor> {
 
     @Override
     public FragmentExtractor visitFragmentDefinition(GraphqlParser.FragmentDefinitionContext ctx) {
-        LOGGER.debug("visitFragmentDefinition " + ctx.getText());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("visitFragmentDefinition " + ctx.getText());
+        }
         Extract extract = new Extract();
         extract.visitFragmentDefinition(ctx);
         fragments.put(extract.name, extract.selectionSet);

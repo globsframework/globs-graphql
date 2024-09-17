@@ -78,7 +78,7 @@ public class GQLGlobCallerBuilderTest extends TestCase {
 
         gqlGlobCallerBuilder.registerLoader(Human.birthDate, new GQLGlobLoad<>() {
             @Override
-            public CompletableFuture<Object> load(GqlField gqlField, GQLGlobCaller.GQLContext callContext, List<OnLoad> parents) {
+            public CompletableFuture<Void> load(GqlField gqlField, GQLGlobCaller.GQLContext callContext, List<OnLoad> parents) {
                 for (OnLoad parent : parents) {
                     parent.onNew().push(parent.parent());
                 }
@@ -91,7 +91,7 @@ public class GQLGlobCallerBuilderTest extends TestCase {
 
         gqlGlobCallerBuilder.registerLoader(QueryType.humain, new GQLGlobLoad<>() {
             @Override
-            public CompletableFuture<Object> load(GqlField gqlField, GQLGlobCaller.GQLContext callContext, List<OnLoad> parents) {
+            public CompletableFuture<Void> load(GqlField gqlField, GQLGlobCaller.GQLContext callContext, List<OnLoad> parents) {
                 Glob parameters = gqlField.field().parameters().orElseThrow();
                 if (parameters.isSet(HumanQuery.id)) {
                     String id = parameters.get(HumanQuery.id);

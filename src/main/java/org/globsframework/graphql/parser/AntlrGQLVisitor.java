@@ -286,14 +286,18 @@ public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
 
         @Override
         public ExtractSelection visitSelection(GraphqlParser.SelectionContext ctx) {
-            LOGGER.debug("visitSelection " + ctx.getText());
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("visitSelection " + ctx.getText());
+            }
             super.visitSelection(ctx);
             trees.pop().complete();
             return this;
         }
 
         public ExtractSelection visitArguments(GraphqlParser.ArgumentsContext ctx) {
-            LOGGER.debug("visitArguments " + ctx.getText());
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("visitArguments " + ctx.getText());
+            }
             MutableGlob mutableGlob = trees.element().getArguments();
             final StringBuilder stringBuilder = new StringBuilder();
             JsonBuilder jsonBuilder = new JsonBuilder(variables, stringBuilder);
@@ -331,7 +335,9 @@ public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
 
         @Override
         public ExtractSelection visitFragmentName(GraphqlParser.FragmentNameContext ctx) {
-            LOGGER.debug("visit fragment name " + ctx.getText());
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("visit fragment name " + ctx.getText());
+            }
             final ExtractSelection selection = super.visitFragmentName(ctx);
             final GraphqlParser.SelectionSetContext selectionSetContext = fragments.get(ctx.getText());
             super.visitSelectionSet(selectionSetContext);
@@ -344,19 +350,25 @@ public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
 
         @Override
         public ExtractSelection visitFragmentSpread(GraphqlParser.FragmentSpreadContext ctx) {
-            LOGGER.debug("visit fragment Spread " + ctx.getText());
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("visit fragment Spread " + ctx.getText());
+            }
             return super.visitFragmentSpread(ctx);
         }
 
         @Override
         public ExtractSelection visitInlineFragment(GraphqlParser.InlineFragmentContext ctx) {
-            LOGGER.debug("visit fragment Inline " + ctx.getText());
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("visit fragment Inline " + ctx.getText());
+            }
             return super.visitInlineFragment(ctx);
         }
 
         @Override
         public ExtractSelection visitFragmentDefinition(GraphqlParser.FragmentDefinitionContext ctx) {
-            LOGGER.debug("visit Fragment Definition " + ctx.getText());
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("visit Fragment Definition " + ctx.getText());
+            }
             return super.visitFragmentDefinition(ctx);
         }
     }

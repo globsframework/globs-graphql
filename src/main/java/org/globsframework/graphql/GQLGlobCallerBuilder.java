@@ -5,7 +5,6 @@ import org.globsframework.functional.FunctionalKeyBuilder;
 import org.globsframework.graphql.model.GQLPageInfo;
 import org.globsframework.graphql.parser.GqlField;
 import org.globsframework.json.GSonUtils;
-import org.globsframework.metamodel.fields.Field;
 import org.globsframework.metamodel.GlobModel;
 import org.globsframework.metamodel.GlobType;
 import org.globsframework.metamodel.GlobTypeLoaderFactory;
@@ -23,15 +22,25 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
     private static final Logger LOGGER = LoggerFactory.getLogger(GQLGlobCallerBuilder.class);
-    private Map<Field, GQLGlobLoad<C>> loaders = new HashMap<>();
-    private Map<Field, ConnectionInfo<C>> connections = new HashMap<>();
-    private MapOfMaps<Field, GlobType, GQLGlobFieldMapper> fieldMapper = new MapOfMaps<>();
-    private MapOfMaps<GlobType, FunctionalKeyBuilder, GQLGlobFetcher<C>> fetchers = new MapOfMaps<>();
-    private MapOfMaps<Field, GlobType, GQLKeyExtractor<C>> keyExtractors = new MapOfMaps<>();
+    private final Executor executor;
+    private final Map<Field, GQLGlobLoad<C>> loaders = new HashMap<>();
+    private final Map<Field, ConnectionInfo<C>> connections = new HashMap<>();
+    private final MapOfMaps<Field, GlobType, GQLGlobFieldMapper> fieldMapper = new MapOfMaps<>();
+    private final MapOfMaps<GlobType, FunctionalKeyBuilder, GQLGlobFetcher<C>> fetchers = new MapOfMaps<>();
+    private final MapOfMaps<Field, GlobType, GQLKeyExtractor<C>> keyExtractors = new MapOfMaps<>();
+
+    public GQLGlobCallerBuilder() {
+        this.executor = Runnable::run;
+    }
+
+    public GQLGlobCallerBuilder(Executor executor) {
+        this.executor = executor;
+    }
 
     public void registerLoader(Field field, GQLGlobLoad<C> gqlGlobLoad) {
         loaders.put(field, gqlGlobLoad);
@@ -90,7 +99,7 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
         }
 
         public static Object toObject(Field field, String value) {
-            if (value == null ) {
+            if (value == null) {
                 return null;
             }
             final Ref<Object> ctx2 = new Ref<>();
@@ -221,7 +230,7 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
                 if (connection != null) {
                     List<Node> newNode = new ArrayList<>();
                     futurs.add(manageConnection(outField, gqlField, connection, current, callContext, newNode)
-                            .thenCompose(gqlType -> deepScan(gqlType, callContext, newNode)));
+                            .thenComposeAsync(gqlType -> deepScan(gqlType, callContext, newNode), executor));
                 } else {
                     GQLGlobLoad<C> gqlGlobLoad = loaders.get(field);
                     if (gqlGlobLoad != null) {
@@ -230,8 +239,10 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
                             newNode.add(node.addChild(outField, gqlField.gqlGlobType(), data));
                         })).collect(Collectors.toList());
 
-                        CompletableFuture<Void> future = gqlGlobLoad.load(gqlField, callContext, parents)
-                                .thenCompose(unused -> deepScan(gqlField.gqlGlobType(), callContext, newNode));
+                        CompletableFuture<Void> future =
+                                CompletableFuture.completedFuture(null)
+                                        .thenComposeAsync(a -> gqlGlobLoad.load(gqlField, callContext, parents), executor)
+                                        .thenComposeAsync(unused -> deepScan(gqlField.gqlGlobType(), callContext, newNode), executor);
                         futurs.add(future);
                     } else {
                         Map<GlobType, GQLKeyExtractor<C>> gqlKeyExtractors = keyExtractors.get(field);
@@ -245,32 +256,41 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
                                     throw new RuntimeException(msg);
                                 }
                                 MapOfMaps<FunctionalKeyBuilder, FunctionalKey, List<Node>> call = new MapOfMaps<>();
-                                gqlKeyExtractor.extract(gqlField, callContext,
-                                        current.stream().map(node -> new OnExtract(node.data, key -> {
-                                            List<Node> list = call.get(key.getBuilder(), key);
-                                            if (list == null) {
-                                                call.put(key.getBuilder(), key, new ArrayList<Node>(List.of(node)));
-                                            } else {
-                                                list.add(node);
-                                            }
-                                        })).collect(Collectors.toList()));
-                                for (Map.Entry<FunctionalKeyBuilder, Map<FunctionalKey, List<Node>>> functionalKeyBuilderMapEntry : call.entry()) {
-                                    List<Node> newNode = new ArrayList<>();
-                                    GQLGlobFetcher<C> gqlGlobFetcher = fetchers.get(gqlField.gqlGlobType().type, functionalKeyBuilderMapEntry.getKey());
-                                    if (gqlGlobFetcher == null) {
-                                        final String s = "Can not find fetcher for " + gqlField.gqlGlobType().type;
-                                        LOGGER.error(s);
-                                        throw new RuntimeException(s);
-                                    }
-                                    gqlGlobFetcher.load(gqlField.gqlGlobType(), callContext, functionalKeyBuilderMapEntry.getValue().entrySet()
-                                                    .stream().map(functionalKeyListEntry -> new OnKey(functionalKeyListEntry.getKey(), data -> {
-                                                        for (Node node : functionalKeyListEntry.getValue()) {
-                                                            newNode.add(node.addChild(outField, gqlField.gqlGlobType(), data));
-                                                        }
-                                                    })).collect(Collectors.toList()))
-                                            .thenCompose(unused -> deepScan(gqlField.gqlGlobType(), callContext, newNode));
+                                CompletableFuture<Void> future = CompletableFuture.completedFuture(null)
+                                        .thenComposeAsync(z -> gqlKeyExtractor.extract(gqlField, callContext,
+                                                current.stream().map(node -> new OnExtract(node.data, key -> {
+                                                    List<Node> list = call.get(key.getBuilder(), key);
+                                                    if (list == null) {
+                                                        call.put(key.getBuilder(), key, new ArrayList<Node>(List.of(node)));
+                                                    } else {
+                                                        list.add(node);
+                                                    }
+                                                })).collect(Collectors.toList())), executor)
+                                        .thenComposeAsync(x -> {
+                                            List<CompletableFuture<Void>> keyFutures = new ArrayList<>();
+                                            for (Map.Entry<FunctionalKeyBuilder, Map<FunctionalKey, List<Node>>> functionalKeyBuilderMapEntry : call.entry()) {
+                                                List<Node> newNode = new ArrayList<>();
+                                                GQLGlobFetcher<C> gqlGlobFetcher = fetchers.get(gqlField.gqlGlobType().type, functionalKeyBuilderMapEntry.getKey());
+                                                if (gqlGlobFetcher == null) {
+                                                    final String s = "Can not find fetcher for " + gqlField.gqlGlobType().type;
+                                                    LOGGER.error(s);
+                                                    throw new RuntimeException(s);
+                                                }
+                                                keyFutures.add(
+                                                        CompletableFuture.completedFuture(null)
+                                                                .thenComposeAsync(
+                                                                        y -> gqlGlobFetcher.load(gqlField.gqlGlobType(), callContext, functionalKeyBuilderMapEntry.getValue().entrySet()
+                                                                                .stream().map(functionalKeyListEntry -> new OnKey(functionalKeyListEntry.getKey(), data -> {
+                                                                                    for (Node node : functionalKeyListEntry.getValue()) {
+                                                                                        newNode.add(node.addChild(outField, gqlField.gqlGlobType(), data));
+                                                                                    }
+                                                                                })).collect(Collectors.toList())), executor)
+                                                                .thenComposeAsync(unused -> deepScan(gqlField.gqlGlobType(), callContext, newNode), executor));
 
-                                }
+                                            }
+                                            return CompletableFuture.allOf(keyFutures.toArray(CompletableFuture[]::new));
+                                        }, executor);
+                                futurs.add(future);
                             }
                         } else {
                             LOGGER.warn("no loader for " + field);
