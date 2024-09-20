@@ -1,14 +1,13 @@
 package org.globsframework.graphql.parser;
 
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.globsframework.core.metamodel.GlobModel;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.model.MutableGlob;
+import org.globsframework.graphql.GQLGlobType;
 import org.globsframework.graphql.parser.antlr.GraphqlBaseVisitor;
 import org.globsframework.graphql.parser.antlr.GraphqlParser;
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.globsframework.graphql.GQLGlobType;
 import org.globsframework.json.GSonUtils;
-import org.globsframework.json.ReadJsonWithReaderFieldVisitor;
-import org.globsframework.metamodel.GlobModel;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.model.MutableGlob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,7 +115,7 @@ public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
         }
 
         public JsonBuilder visitArgument(GraphqlParser.ArgumentContext ctx) {
-            boolean previous =  states.element().isFirst;
+            boolean previous = states.element().isFirst;
             int len = stringBuilder.length();
             if (!states.element().isFirst) {
                 stringBuilder.append(",");

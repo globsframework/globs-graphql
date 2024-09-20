@@ -1,6 +1,6 @@
 package org.globsframework.graphql.parser;
 
-import org.globsframework.model.MutableGlob;
+import org.globsframework.core.model.MutableGlob;
 
 public interface GqlGlobBuilder {
 

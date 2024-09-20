@@ -1,7 +1,7 @@
 package org.globsframework.graphql;
 
-import org.globsframework.model.Glob;
-import org.globsframework.model.Key;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.model.Key;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;

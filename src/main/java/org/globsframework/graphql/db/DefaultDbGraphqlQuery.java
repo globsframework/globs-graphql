@@ -1,15 +1,15 @@
 package org.globsframework.graphql.db;
 
+import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.streams.accessors.LongAccessor;
 import org.globsframework.graphql.GQLGlobCallerBuilder;
 import org.globsframework.json.GSonUtils;
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.model.Glob;
 import org.globsframework.sql.SelectBuilder;
 import org.globsframework.sql.SelectQuery;
 import org.globsframework.sql.SqlConnection;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.constraints.Constraints;
-import org.globsframework.streams.accessors.LongAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,8 +102,7 @@ public class DefaultDbGraphqlQuery implements DbGraphqlQuery {
             } else {
                 if (wantedOrder.isEmpty() || wantedOrder.get() == Order.asc) {
                     queryBuilder.orderAsc(idField);
-                }
-                else {
+                } else {
                     queryBuilder.orderDesc(idField);
                 }
             }

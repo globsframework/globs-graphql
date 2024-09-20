@@ -1,14 +1,14 @@
 package org.globsframework.graphql;
 
-import org.globsframework.graphql.parser.antlr.GraphqlLexer;
-import org.globsframework.graphql.parser.antlr.GraphqlParser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.globsframework.core.metamodel.GlobModel;
+import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.graphql.parser.AntlrGQLVisitor;
 import org.globsframework.graphql.parser.FragmentExtractor;
-import org.globsframework.metamodel.GlobModel;
-import org.globsframework.metamodel.GlobType;
+import org.globsframework.graphql.parser.antlr.GraphqlLexer;
+import org.globsframework.graphql.parser.antlr.GraphqlParser;
 
 import java.util.Map;
 

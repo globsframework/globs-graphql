@@ -1,7 +1,7 @@
 package org.globsframework.graphql;
 
+import org.globsframework.core.model.Glob;
 import org.globsframework.json.GSonUtils;
-import org.globsframework.model.Glob;
 import org.slf4j.Logger;
 
 public interface OnNewData {
@@ -13,5 +13,7 @@ public interface OnNewData {
             logger.info("Receive " + GSonUtils.encode(data, true));
             parent.push(data);
         };
-    };
+    }
+
+    ;
 }

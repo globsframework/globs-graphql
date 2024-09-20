@@ -1,8 +1,8 @@
 package org.globsframework.graphql;
 
 import junit.framework.TestCase;
+import org.globsframework.core.metamodel.impl.DefaultGlobModel;
 import org.globsframework.graphql.model.*;
-import org.globsframework.metamodel.impl.DefaultGlobModel;
 import org.junit.Assert;
 
 public class GlobSchemaGeneratorTest extends TestCase {
@@ -14,79 +14,79 @@ public class GlobSchemaGeneratorTest extends TestCase {
         System.out.println(s);
         Assert.assertTrue(
                 s.contains("""
-scalar Date
-scalar DateTime
-scalar Long
-"""));
+                        scalar Date
+                        scalar DateTime
+                        scalar Long
+                        """));
         Assert.assertTrue(
                 s.contains("""
-schema  {
-query : Query
-mutation : Mutation
-}
-"""));
+                        schema  {
+                        query : Query
+                        mutation : Mutation
+                        }
+                        """));
         Assert.assertTrue(s.contains("""
-type Query {
-humain(id:String) : human
-humains(first:Int, after:String, orderBy:String, order:String, startedAt:DateTime) : HumanConnection
-complexHumains(who:String, subInfo:subinfo) : HumanConnection
-}
-"""));
+                type Query {
+                humain(id:String) : human
+                humains(first:Int, after:String, orderBy:String, order:String, startedAt:DateTime) : HumanConnection
+                complexHumains(who:String, subInfo:subinfo) : HumanConnection
+                }
+                """));
         Assert.assertTrue(s.contains("""
-type human {
-id : ID
-surName : String
-firstName : String
-lastName : String
-birthDate : birthDate
-friends(sort:String, name:[String]) : [human]
-}
-"""));
+                type human {
+                id : ID
+                surName : String
+                firstName : String
+                lastName : String
+                birthDate : birthDate
+                friends(sort:String, name:[String]) : [human]
+                }
+                """));
         Assert.assertTrue(s.contains("""
-type birthDate {
-day : Int
-month : Int
-year : Int
-}
-"""));
+                type birthDate {
+                day : Int
+                month : Int
+                year : Int
+                }
+                """));
         Assert.assertTrue(s.contains("""
-type HumanConnection {
-totalCount : Int
-edges : [HumanEdge]
-pageInfo : gQLPageInfo
-}
-"""));
+                type HumanConnection {
+                totalCount : Int
+                edges : [HumanEdge]
+                pageInfo : gQLPageInfo
+                }
+                """));
         Assert.assertTrue(s.contains("""
-type HumanEdge {
-node : human
-cursor : String
-}
-"""));
+                type HumanEdge {
+                node : human
+                cursor : String
+                }
+                """));
         Assert.assertTrue(s.contains("""
-type gQLPageInfo {
-startCursor : String
-endCursor : String
-hasNextPage : Boolean!
-hasPreviousPage : Boolean!
-}
-"""));
+                type gQLPageInfo {
+                startCursor : String
+                endCursor : String
+                hasNextPage : Boolean!
+                hasPreviousPage : Boolean!
+                }
+                """));
         Assert.assertTrue(s.contains("""
-type Mutation {
-createHumain(humain:humanInput) : human
-}
-"""));
+                type Mutation {
+                createHumain(humain:humanInput) : human
+                }
+                """));
         Assert.assertTrue(s.contains("""
-input humanInput {
-firstName : String
-lastName : String
-}
-"""));
+                input humanInput {
+                firstName : String
+                lastName : String
+                }
+                """));
         Assert.assertTrue(s.contains("""
-input subinfo {
-firstName : String
-lastName : String
-}
-"""));
+                input subinfo {
+                firstName : String
+                lastName : String
+                }
+                """));
     }
 
 //    public void testQuery() {

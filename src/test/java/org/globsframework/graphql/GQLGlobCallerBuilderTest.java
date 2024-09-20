@@ -1,20 +1,23 @@
 package org.globsframework.graphql;
 
 import junit.framework.TestCase;
-import org.globsframework.functional.FunctionalKeyBuilder;
-import org.globsframework.functional.impl.DefaultFunctionalKeyBuilderFactory;
+import org.globsframework.core.functional.FunctionalKeyBuilder;
+import org.globsframework.core.functional.impl.DefaultFunctionalKeyBuilderFactory;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.annotations.KeyAnnotationType;
+import org.globsframework.core.metamodel.fields.DateField;
+import org.globsframework.core.metamodel.fields.StringField;
+import org.globsframework.core.metamodel.impl.DefaultGlobModel;
+import org.globsframework.core.metamodel.impl.DefaultGlobTypeBuilder;
+import org.globsframework.core.model.FieldValue;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.model.KeyBuilder;
+import org.globsframework.core.model.MutableGlob;
+import org.globsframework.core.model.repository.DefaultGlobRepository;
+import org.globsframework.core.utils.collections.MultiMap;
 import org.globsframework.graphql.model.*;
 import org.globsframework.graphql.parser.GqlField;
 import org.globsframework.json.GSonUtils;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.annotations.KeyAnnotationType;
-import org.globsframework.metamodel.fields.DateField;
-import org.globsframework.metamodel.fields.StringField;
-import org.globsframework.metamodel.impl.DefaultGlobModel;
-import org.globsframework.metamodel.impl.DefaultGlobTypeBuilder;
-import org.globsframework.model.*;
-import org.globsframework.model.repository.DefaultGlobRepository;
-import org.globsframework.utils.collections.MultiMap;
 import org.junit.Assert;
 
 import java.time.LocalDate;
@@ -31,7 +34,7 @@ public class GQLGlobCallerBuilderTest extends TestCase {
     private GlobType humainType;
 
 
-    public void setUp(){
+    public void setUp() {
         DefaultGlobTypeBuilder defaultGlobTypeBuilder = new DefaultGlobTypeBuilder("Humain");
         firstName = defaultGlobTypeBuilder.declareStringField("firstName");
         lastName = defaultGlobTypeBuilder.declareStringField("lastName");
@@ -165,22 +168,22 @@ public class GQLGlobCallerBuilderTest extends TestCase {
         }
         {
             final CompletableFuture<Glob> id1 = gqlGlobCaller.query("""
-                    query toto {
-                       humain(id: $ID) {
-                            firstName     
-                            lastName     
-                            birthDate {  
-                                   year     
-                                 }     
-                            friends(sort: "lastName", name: ["AA", "BB"]) {
-                                   firstName        
-                                   friends(sort: "lastName") {
-                                      firstName           
-                                      lastName        
-                                   }     
-                            }   
-                      }
-                    }""",
+                            query toto {
+                               humain(id: $ID) {
+                                    firstName     
+                                    lastName     
+                                    birthDate {  
+                                           year     
+                                         }     
+                                    friends(sort: "lastName", name: ["AA", "BB"]) {
+                                           firstName        
+                                           friends(sort: "lastName") {
+                                              firstName           
+                                              lastName        
+                                           }     
+                                    }   
+                              }
+                            }""",
                     Map.of("ID", "\"AZE\""), null);
             Glob query = id1.join();
 
@@ -189,21 +192,21 @@ public class GQLGlobCallerBuilderTest extends TestCase {
         }
         {
             final CompletableFuture<Glob> id1 = gqlGlobCaller.query("query toto {" +
-                                                                    "   humain(id: $ID) {" +
-                                                                    "     firstName" +
-                                                                    "     lastName" +
-                                                                    "     birthDate {" +
-                                                                    "       year" +
-                                                                    "     }" +
-                                                                    "     friends(sort: \"lastName\" name: [$V1, \"BB\"]) {" +
-                                                                    "        firstName" +
-                                                                    "        friends(sort: \"lastName\") {" +
-                                                                    "           firstName" +
-                                                                    "           lastName" +
-                                                                    "        }" +
-                                                                    "     }" +
-                                                                    "   }" +
-                                                                    "}", Map.of("ID", "\"AZE\"", "V1", "\"AA\""), null);
+                    "   humain(id: $ID) {" +
+                    "     firstName" +
+                    "     lastName" +
+                    "     birthDate {" +
+                    "       year" +
+                    "     }" +
+                    "     friends(sort: \"lastName\" name: [$V1, \"BB\"]) {" +
+                    "        firstName" +
+                    "        friends(sort: \"lastName\") {" +
+                    "           firstName" +
+                    "           lastName" +
+                    "        }" +
+                    "     }" +
+                    "   }" +
+                    "}", Map.of("ID", "\"AZE\"", "V1", "\"AA\""), null);
             Glob query = id1.join();
 
             Assert.assertEquals("{\"humain\":{\"firstName\":\"LA\",\"lastName\":\"GG\",\"birthDate\":{\"year\":1980},\"friends\":[{\"firstName\":\"DSS\"},{\"firstName\":\"DDD\",\"friends\":[{\"firstName\":\"DSS\",\"lastName\":\"GCW\"}]}]}}",

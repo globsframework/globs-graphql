@@ -1,19 +1,19 @@
 package org.globsframework.graphql;
 
-import org.globsframework.functional.FunctionalKey;
-import org.globsframework.functional.FunctionalKeyBuilder;
+import org.globsframework.core.functional.FunctionalKey;
+import org.globsframework.core.functional.FunctionalKeyBuilder;
+import org.globsframework.core.metamodel.GlobModel;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
+import org.globsframework.core.metamodel.fields.*;
+import org.globsframework.core.model.FieldValuesAccessor;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.model.MutableGlob;
+import org.globsframework.core.utils.Ref;
+import org.globsframework.core.utils.collections.MapOfMaps;
 import org.globsframework.graphql.model.GQLPageInfo;
 import org.globsframework.graphql.parser.GqlField;
 import org.globsframework.json.GSonUtils;
-import org.globsframework.metamodel.GlobModel;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.GlobTypeLoaderFactory;
-import org.globsframework.metamodel.fields.*;
-import org.globsframework.model.FieldValuesAccessor;
-import org.globsframework.model.Glob;
-import org.globsframework.model.MutableGlob;
-import org.globsframework.utils.Ref;
-import org.globsframework.utils.collections.MapOfMaps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

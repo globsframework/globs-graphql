@@ -1,5 +1,16 @@
 package org.globsframework.graphql.db;
 
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
+import org.globsframework.core.metamodel.annotations.InitUniqueGlob;
+import org.globsframework.core.metamodel.annotations.KeyField;
+import org.globsframework.core.metamodel.annotations.Target;
+import org.globsframework.core.metamodel.fields.GlobArrayField;
+import org.globsframework.core.metamodel.fields.GlobField;
+import org.globsframework.core.metamodel.fields.IntegerField;
+import org.globsframework.core.metamodel.fields.StringField;
+import org.globsframework.core.metamodel.impl.DefaultGlobModel;
+import org.globsframework.core.model.Glob;
 import org.globsframework.graphql.GQLGlobCaller;
 import org.globsframework.graphql.GQLGlobCallerBuilder;
 import org.globsframework.graphql.GQLGlobConnectionLoad;
@@ -8,17 +19,6 @@ import org.globsframework.graphql.model.GQLPageInfo;
 import org.globsframework.graphql.model.GQLQueryParam_;
 import org.globsframework.graphql.parser.GqlField;
 import org.globsframework.json.GSonUtils;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.GlobTypeLoaderFactory;
-import org.globsframework.metamodel.annotations.InitUniqueGlob;
-import org.globsframework.metamodel.annotations.KeyField;
-import org.globsframework.metamodel.annotations.Target;
-import org.globsframework.metamodel.fields.GlobArrayField;
-import org.globsframework.metamodel.fields.GlobField;
-import org.globsframework.metamodel.fields.IntegerField;
-import org.globsframework.metamodel.fields.StringField;
-import org.globsframework.metamodel.impl.DefaultGlobModel;
-import org.globsframework.model.Glob;
 import org.globsframework.sql.drivers.jdbc.JdbcConnection;
 import org.globsframework.sql.drivers.jdbc.JdbcSqlService;
 import org.junit.Assert;
@@ -32,7 +32,7 @@ import java.util.concurrent.CompletableFuture;
 public class DefaultDbGraphqlQueryTest {
 
     @Test
-   public void name() {
+    public void name() {
         JdbcSqlService sqlService = new JdbcSqlService("jdbc:hsqldb:.", "sa", "");
         ArrayList<Glob> data = new ArrayList<>();
         final int dbLine = 1000;
@@ -130,6 +130,7 @@ public class DefaultDbGraphqlQueryTest {
 
         @Target(HumainQuery.class)
         public static GlobField query;
+
         static {
             GlobTypeLoaderFactory.create(SchemaType.class).load();
         }

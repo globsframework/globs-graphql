@@ -1,10 +1,10 @@
 package org.globsframework.graphql.model;
 
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.GlobTypeLoaderFactory;
-import org.globsframework.metamodel.annotations.KeyField;
-import org.globsframework.metamodel.annotations.Target;
-import org.globsframework.metamodel.fields.*;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
+import org.globsframework.core.metamodel.annotations.KeyField;
+import org.globsframework.core.metamodel.annotations.Target;
+import org.globsframework.core.metamodel.fields.*;
 
 public class Human {
     public static GlobType TYPE;
@@ -53,7 +53,7 @@ public class Human {
 
         public static IntegerField year;
 
-        static  {
+        static {
             GlobTypeLoaderFactory.create(BirthDate.class).load();
         }
     }

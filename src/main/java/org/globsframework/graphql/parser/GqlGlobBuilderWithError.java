@@ -1,6 +1,6 @@
 package org.globsframework.graphql.parser;
 
-import org.globsframework.model.MutableGlob;
+import org.globsframework.core.model.MutableGlob;
 
 public class GqlGlobBuilderWithError implements GqlGlobBuilder {
 
@@ -18,6 +18,6 @@ public class GqlGlobBuilderWithError implements GqlGlobBuilder {
     }
 
     public GqlGlobBuilder addSub(String fieldName, String alias) {
-        throw new RuntimeException("NI " + fieldName +" "  + alias + this.getClass());
+        throw new RuntimeException("NI " + fieldName + " " + alias + this.getClass());
     }
 }

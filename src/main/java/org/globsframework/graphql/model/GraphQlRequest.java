@@ -1,9 +1,9 @@
 package org.globsframework.graphql.model;
 
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
+import org.globsframework.core.metamodel.fields.StringField;
 import org.globsframework.json.annottations.IsJsonContentAnnotation;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.GlobTypeLoaderFactory;
-import org.globsframework.metamodel.fields.StringField;
 
 public class GraphQlRequest {
     public static GlobType TYPE;

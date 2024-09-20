@@ -1,14 +1,14 @@
 package org.globsframework.graphql.db;
 
-import org.globsframework.functional.FunctionalKey;
+import org.globsframework.core.functional.FunctionalKey;
+import org.globsframework.core.metamodel.fields.StringField;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.utils.collections.MultiMap;
 import org.globsframework.graphql.OnKey;
-import org.globsframework.metamodel.fields.StringField;
-import org.globsframework.model.Glob;
 import org.globsframework.sql.SelectQuery;
 import org.globsframework.sql.SqlConnection;
 import org.globsframework.sql.constraints.Constraint;
 import org.globsframework.sql.constraints.Constraints;
-import org.globsframework.utils.collections.MultiMap;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -24,6 +24,7 @@ public class GQLDbUtils {
 
             }
         };
+
         Glob get(FunctionalKey functionalKey);
 
         void push(FunctionalKey functionalKey, Glob glob);
@@ -41,8 +42,7 @@ public class GQLDbUtils {
             final Glob glob = cached.get(parent.key());
             if (glob != null) {
                 parent.onNew().push(glob);
-            }
-            else {
+            } else {
                 keyOnLoadMap.put(parent.key().get(fKeyField), parent);
             }
         }

@@ -1,10 +1,10 @@
 package org.globsframework.graphql.parser;
 
+import org.globsframework.core.metamodel.GlobModel;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.graphql.GQLGlobType;
 import org.globsframework.graphql.parser.antlr.GraphqlBaseListener;
 import org.globsframework.graphql.parser.antlr.GraphqlParser;
-import org.globsframework.graphql.GQLGlobType;
-import org.globsframework.metamodel.GlobModel;
-import org.globsframework.metamodel.GlobType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

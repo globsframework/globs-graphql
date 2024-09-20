@@ -10,6 +10,7 @@ public interface GQLGlobLoad<C extends GQLGlobCaller.GQLContext> {
         parents.forEach(parent -> parent.onNew().push(parent.parent()));
         return CompletableFuture.completedFuture(null);
     };
+
     CompletableFuture<Void> load(GqlField gqlField, C callContext, List<OnLoad> parents);
 
     record CursorInfo(boolean hasPrevious, boolean hasNext) {

@@ -1,16 +1,16 @@
 package org.globsframework.graphql;
 
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.core.metamodel.fields.GlobArrayField;
+import org.globsframework.core.metamodel.fields.GlobField;
+import org.globsframework.core.model.AbstractFieldSetter;
+import org.globsframework.core.model.FieldSetter;
+import org.globsframework.core.model.Glob;
+import org.globsframework.core.model.MutableGlob;
+import org.globsframework.core.utils.collections.MultiMap;
+import org.globsframework.core.utils.exceptions.ItemNotFound;
 import org.globsframework.graphql.model.GQLMandatory;
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.fields.GlobArrayField;
-import org.globsframework.metamodel.fields.GlobField;
-import org.globsframework.model.AbstractFieldSetter;
-import org.globsframework.model.FieldSetter;
-import org.globsframework.model.Glob;
-import org.globsframework.model.MutableGlob;
-import org.globsframework.utils.collections.MultiMap;
-import org.globsframework.utils.exceptions.ItemNotFound;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -39,8 +39,7 @@ public class Node {
             if (qglFieldWithParameter.gqlGlobType() == null) {
                 if (field.getName().equals("__typename")) {
                     out.set(field.asStringField(), field.getGlobType().getName());
-                }
-                else {
+                } else {
                     if (data == null) {
                         return;
                     }
@@ -66,19 +65,19 @@ public class Node {
                         final Optional<Glob> parameters = gqlField.field().parameters();
                         final Optional<Comparator> comparator =
                                 parameters.map(p -> {
-                            final Field sort = p.getType().findField("sort");
-                            if (sort != null) {
-                                final Optional<String> s = p.getOptNotEmpty(sort.asStringField());
-                                final Glob data1 = firstNode.data;
-                                if (data1 == null) {
-                                    return Comparator.naturalOrder();
-                                }
-                                final Field field1 = data1.getType().getField(s.orElse(null));
-                                final Comparator comparing = Comparator.comparing((Node o) -> ((Comparable) o.data.getValue(field1)));
-                                return comparing;
-                            }
-                            return null;
-                        });
+                                    final Field sort = p.getType().findField("sort");
+                                    if (sort != null) {
+                                        final Optional<String> s = p.getOptNotEmpty(sort.asStringField());
+                                        final Glob data1 = firstNode.data;
+                                        if (data1 == null) {
+                                            return Comparator.naturalOrder();
+                                        }
+                                        final Field field1 = data1.getType().getField(s.orElse(null));
+                                        final Comparator comparing = Comparator.comparing((Node o) -> ((Comparable) o.data.getValue(field1)));
+                                        return comparing;
+                                    }
+                                    return null;
+                                });
 
                         int i = 0;
                         if (comparator.isPresent()) {
@@ -87,8 +86,7 @@ public class Node {
                             for (Node node : nodes1) {
                                 res[i++] = node.buildResponse(gqlGlobCallerBuilder);
                             }
-                        }
-                        else {
+                        } else {
                             for (Node node : nodes) {
                                 res[i++] = node.buildResponse(gqlGlobCallerBuilder);
                             }
@@ -97,8 +95,7 @@ public class Node {
                     } else {
                         throw new RuntimeException("Not managed.");
                     }
-                }
-                else {
+                } else {
                     if (field.hasAnnotation(GQLMandatory.KEY) && field instanceof GlobArrayField globArrayField) {
                         out.set(globArrayField, new Glob[0]);
                     }

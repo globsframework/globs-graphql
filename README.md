@@ -1,7 +1,8 @@
 # globs-graphql
+
 Because data are Glob building a graphql library is simple.
 To use the API a Schema must be defined.
-For exemple : 
+For exemple :
 
  ```
  public class SchemaType {
@@ -20,6 +21,7 @@ For exemple :
 ```
 
 the query :
+
 ```
 public class QueryType {
     public static GlobType TYPE;
@@ -36,6 +38,7 @@ public class QueryType {
 ```
 
 The connection must follow the standard for a connection :
+
 ```
 public class HumanConnection {
     public static GlobType TYPE;
@@ -58,24 +61,31 @@ Now we register functor to fetch glob and map field.
 A node in the graph is represented by a glob that is push by the parent in the graph.
 The type of the Glob is not the graphql type (so a field mapping is mandatory)
 
-The class 
+The class
+
 ```
 GQLGlobCallerBuilder gqlGlobCallerBuilder = new GQLGlobCallerBuilder();
 ```
+
 is there to register the functor like :
+
 ```
 gqlGlobCallerBuilder.registerSimpleField(Humain.firstName, DbHumain.firstName);
 ```
+
 In fact, if the name is the same, the registerField is automatique.
 
-A more complexe mapping : 
+A more complexe mapping :
+
 ```
 gqlGlobCallerBuilder.registerField(Human.BirthDate.day, birthDate.getGlobType(), (source, target) -> target.set(Human.BirthDate.day, source.get(birthDate).getDayOfMonth()));
 ```
+
 It say : for the field Human.BirthDate.day if the GlobType of the node is a of type birthDate.getGlobType()
 than apply the mapping to extract the day from the month.
 
 Now to fetch a given Humain
+
 ```
 gqlGlobCallerBuilder.registerLoader(QueryType.humain, new GQLGlobLoad<>() {
     @Override
@@ -91,14 +101,20 @@ gqlGlobCallerBuilder.registerLoader(QueryType.humain, new GQLGlobLoad<>() {
     }
 });
 ```
-The library group all the parent for a given level, it is why parents is a list: there is not a call for each node but a call for each level.
-The humain has a mandatory parameter, we retrieve it, retrieve the associated glob (from the globRepository or from the db)
+
+The library group all the parent for a given level, it is why parents is a list: there is not a call for each node but a
+call for each level.
+The humain has a mandatory parameter, we retrieve it, retrieve the associated glob (from the globRepository or from the
+db)
 then the glob is push to each parent.
 
-It is possible to retrieve glob using functionnalKey, it is usefull if the schema allow the access to the same object from different point.
+It is possible to retrieve glob using functionnalKey, it is usefull if the schema allow the access to the same object
+from different point.
 
-After creating a functionalKeyBuilder, we register a FKeyFetcher that given a functionnalKey return the associated Glob (a cache can be used using the context)
-The code bellow is to access a Humain using it's id 
+After creating a functionalKeyBuilder, we register a FKeyFetcher that given a functionnalKey return the associated
+Glob (a cache can be used using the context)
+The code bellow is to access a Humain using it's id
+
 ```
         FunctionalKeyBuilder functionalKeyBuilder = new DefaultFunctionalKeyBuilderFactory(humainType)
                 .add(id).create();
@@ -112,8 +128,10 @@ The code bellow is to access a Humain using it's id
             }
         });
 ```
+
 And a KeyExtractor, we want the friends for each humain.
 So for each parent we retrieve the id of it's friend and push the functionnalKey using parent.onNew()
+
 ```
         gqlGlobCallerBuilder.registerFKeyExtractor(Human.friends, id.getGlobType(), new GQLKeyExtractor<>() {
             @Override
@@ -130,9 +148,11 @@ So for each parent we retrieve the id of it's friend and push the functionnalKey
             }
         });
 ```
+
 The underlying code call the keyFetcher to associate each humain to their friends.
 
 The last register it to managed connection with cursor and order.
+
 ```
         gqlGlobCallerBuilder.registerConnection(QueryType.humains, new GQLGlobConnectionLoad<>() {
             @Override
@@ -159,6 +179,7 @@ By declaring id and orderBy we allow the library to automatically create the nex
 The cursor give the information for hasNext/hasPrevious.
 
 A more realist query using db :
+
 ```
         gqlGlobCallerBuilder.registerConnection(HumainQuery.humains, new GQLGlobConnectionLoad<GQLGlobCaller.GQLContext>() {
             @Override
@@ -173,18 +194,23 @@ A more realist query using db :
             }
         }, DbHumain.uuid, HumainQuery.Parameter.orderBy);
 ```
+
 Using a ConnectionBuilder it will fetch the wanted size, the first cursor, order, etc.
 It do all the job!
 The cursor are encoded int base64 :
-```eyJfa2luZCI6ImN1cnNvclR5cGUiLCJsYXN0SWQiOiI4NjQiLCJsYXN0T3JkZXJWYWx1ZSI6ImZpcnN0TmFtZSA2NSJ9``` -> ```{"_kind":"cursorType","lastId":"864","lastOrderValue":"firstName 65"}```
+```eyJfa2luZCI6ImN1cnNvclR5cGUiLCJsYXN0SWQiOiI4NjQiLCJsYXN0T3JkZXJWYWx1ZSI6ImZpcnN0TmFtZSA2NSJ9``` ->
+```{"_kind":"cursorType","lastId":"864","lastOrderValue":"firstName 65"}```
 And used in the db query.
 
 After the declaration of the functor we build a GQLGlobCaller
+
 ```
         final GQLGlobCaller<GQLGlobCaller.GQLContext> build =
                 gqlGlobCallerBuilder.build(SchemaType.TYPE, new DefaultGlobModel(HumainQuery.Parameter.TYPE));
 ```
+
 Then The query :
+
 ```
             final CompletableFuture<Glob> id1 = gqlGlobCaller.query("""
                     query myFriends {
@@ -207,9 +233,11 @@ Then The query :
 ```
 
 Last, it is possible to generate the schema using
+
 ```
         GlobSchemaGenerator globSchemaGenerator = new GlobSchemaGenerator(SchemaType.TYPE,
                 new DefaultGlobModel(HumanQuery.TYPE, HumansQuery.TYPE, Human.FriendQueryParam.TYPE, CreateParam.TYPE, ComplexHumansQuery.TYPE));
         final String s = globSchemaGenerator.generateAll();
 ```
+
 Given to Graphql-java lib, it is possible to expose the schema on the graphql api.

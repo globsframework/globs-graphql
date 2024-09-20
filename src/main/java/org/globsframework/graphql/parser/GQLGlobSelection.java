@@ -1,13 +1,12 @@
 package org.globsframework.graphql.parser;
 
+import org.globsframework.core.metamodel.GlobModel;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.GlobTypeBuilder;
+import org.globsframework.core.metamodel.fields.*;
+import org.globsframework.core.metamodel.impl.DefaultGlobTypeBuilder;
+import org.globsframework.core.metamodel.type.DataType;
 import org.globsframework.graphql.GQLGlobType;
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobModel;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.GlobTypeBuilder;
-import org.globsframework.metamodel.fields.*;
-import org.globsframework.metamodel.impl.DefaultGlobTypeBuilder;
-import org.globsframework.metamodel.type.DataType;
 
 import java.util.HashMap;
 import java.util.List;

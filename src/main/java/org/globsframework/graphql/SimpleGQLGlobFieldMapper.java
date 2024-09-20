@@ -1,8 +1,8 @@
 package org.globsframework.graphql;
 
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.model.FieldSetter;
-import org.globsframework.model.Glob;
+import org.globsframework.core.metamodel.fields.Field;
+import org.globsframework.core.model.FieldSetter;
+import org.globsframework.core.model.Glob;
 
 public class SimpleGQLGlobFieldMapper implements GQLGlobFieldMapper {
     final Field sourceField;

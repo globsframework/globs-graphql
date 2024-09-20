@@ -1,14 +1,13 @@
 package org.globsframework.graphql;
 
+import org.globsframework.core.metamodel.GlobModel;
+import org.globsframework.core.metamodel.GlobType;
+import org.globsframework.core.metamodel.annotations.FieldNameAnnotationType;
+import org.globsframework.core.metamodel.fields.*;
+import org.globsframework.core.model.Glob;
 import org.globsframework.graphql.model.GQLMandatory;
 import org.globsframework.graphql.model.GQLQueryParam;
 import org.globsframework.graphql.model.GraphqlEnum;
-import org.globsframework.metamodel.fields.Field;
-import org.globsframework.metamodel.GlobModel;
-import org.globsframework.metamodel.GlobType;
-import org.globsframework.metamodel.annotations.FieldNameAnnotationType;
-import org.globsframework.metamodel.fields.*;
-import org.globsframework.model.Glob;
 
 import java.util.*;
 
