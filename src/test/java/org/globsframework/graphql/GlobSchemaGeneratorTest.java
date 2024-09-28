@@ -53,7 +53,7 @@ public class GlobSchemaGeneratorTest extends TestCase {
                 type HumanConnection {
                 totalCount : Int
                 edges : [HumanEdge]
-                pageInfo : gQLPageInfo
+                pageInfo : GQLPageInfo
                 }
                 """));
         Assert.assertTrue(s.contains("""
@@ -63,7 +63,7 @@ public class GlobSchemaGeneratorTest extends TestCase {
                 }
                 """));
         Assert.assertTrue(s.contains("""
-                type gQLPageInfo {
+                type GQLPageInfo {
                 startCursor : String
                 endCursor : String
                 hasNextPage : Boolean!

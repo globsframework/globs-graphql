@@ -19,6 +19,6 @@ public class GQLPageInfo {
     public static BooleanField hasPreviousPage;
 
     static {
-        GlobTypeLoaderFactory.create(GQLPageInfo.class).load();
+        GlobTypeLoaderFactory.create(GQLPageInfo.class, "GQLPageInfo").load();
     }
 }

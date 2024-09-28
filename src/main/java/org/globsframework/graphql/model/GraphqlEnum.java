@@ -20,7 +20,7 @@ public class GraphqlEnum {
     public static Key UNIQUE_KEY;
 
     static {
-        GlobTypeLoader loader = GlobTypeLoaderFactory.create(GraphqlEnum.class);
+        GlobTypeLoader loader = GlobTypeLoaderFactory.create(GraphqlEnum.class, "GraphqlEnum");
         loader.register(GlobCreateFromAnnotation.class, annotation ->
                 TYPE.instantiate()
                         .set(name, ((GraphqlEnum_) annotation).name())

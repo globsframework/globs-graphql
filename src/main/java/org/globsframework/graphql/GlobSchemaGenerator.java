@@ -2,7 +2,7 @@ package org.globsframework.graphql;
 
 import org.globsframework.core.metamodel.GlobModel;
 import org.globsframework.core.metamodel.GlobType;
-import org.globsframework.core.metamodel.annotations.FieldNameAnnotationType;
+import org.globsframework.core.metamodel.annotations.FieldName;
 import org.globsframework.core.metamodel.fields.*;
 import org.globsframework.core.model.Glob;
 import org.globsframework.graphql.model.GQLMandatory;
@@ -142,13 +142,13 @@ public class GlobSchemaGenerator {
         }
         desc.append(" {\n");
         for (Field field : type.getFields()) {
-            desc.append(FieldNameAnnotationType.getName(field));
+            desc.append(FieldName.getName(field));
             Optional<Glob> typeParameters = field.findOptAnnotation(GQLQueryParam.KEY);
             typeParameters.ifPresent(glob -> {
                 desc.append("(");
                 GlobType parametersType = parameters.getType(glob.get(GQLQueryParam.name));
                 for (Field paramField : parametersType.getFields()) {
-                    desc.append(FieldNameAnnotationType.getName(paramField))
+                    desc.append(FieldName.getName(paramField))
                             .append(":");
                     paramField.safeAccept(new ToGQLTypeVisitor(desc));
                     if (paramField.hasAnnotation(GQLMandatory.KEY)) {

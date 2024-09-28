@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 import org.globsframework.core.functional.FunctionalKeyBuilder;
 import org.globsframework.core.functional.impl.DefaultFunctionalKeyBuilderFactory;
 import org.globsframework.core.metamodel.GlobType;
-import org.globsframework.core.metamodel.annotations.KeyAnnotationType;
+import org.globsframework.core.metamodel.annotations.KeyField;
 import org.globsframework.core.metamodel.fields.DateField;
 import org.globsframework.core.metamodel.fields.StringField;
 import org.globsframework.core.metamodel.impl.DefaultGlobModel;
@@ -39,7 +39,7 @@ public class GQLGlobCallerBuilderTest extends TestCase {
         firstName = defaultGlobTypeBuilder.declareStringField("firstName");
         lastName = defaultGlobTypeBuilder.declareStringField("lastName");
         birthDate = defaultGlobTypeBuilder.declareDateField("birthDate");
-        id = defaultGlobTypeBuilder.declareStringField("id", KeyAnnotationType.create(0));
+        id = defaultGlobTypeBuilder.declareStringField("id", KeyField.create(0));
 
         globRepository = new DefaultGlobRepository();
         humainType = defaultGlobTypeBuilder.get();

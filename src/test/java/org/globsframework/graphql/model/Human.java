@@ -2,14 +2,14 @@ package org.globsframework.graphql.model;
 
 import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
-import org.globsframework.core.metamodel.annotations.KeyField;
+import org.globsframework.core.metamodel.annotations.KeyField_;
 import org.globsframework.core.metamodel.annotations.Target;
 import org.globsframework.core.metamodel.fields.*;
 
 public class Human {
     public static GlobType TYPE;
 
-    @KeyField
+    @KeyField_
     public static StringField id;
 
     public static StringField surName;

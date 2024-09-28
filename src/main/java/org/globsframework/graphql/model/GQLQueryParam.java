@@ -16,7 +16,7 @@ public class GQLQueryParam {
     public static Key KEY;
 
     static {
-        GlobTypeLoaderFactory.create(GQLQueryParam.class)
+        GlobTypeLoaderFactory.create(GQLQueryParam.class, "GQLQueryParam")
                 .register(GlobCreateFromAnnotation.class, annotation -> {
                     try {
                         return TYPE.instantiate()

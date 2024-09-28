@@ -18,7 +18,7 @@ public class GQLMandatory {
     public static Glob UNIQUE;
 
     static {
-        GlobTypeLoaderFactory.create(GQLMandatory.class)
+        GlobTypeLoaderFactory.create(GQLMandatory.class, "GQLMandatory")
                 .register(GlobCreateFromAnnotation.class, annotation -> UNIQUE)
                 .load();
     }

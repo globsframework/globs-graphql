@@ -3,7 +3,7 @@ package org.globsframework.graphql.db;
 import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
 import org.globsframework.core.metamodel.annotations.InitUniqueGlob;
-import org.globsframework.core.metamodel.annotations.KeyField;
+import org.globsframework.core.metamodel.annotations.KeyField_;
 import org.globsframework.core.metamodel.annotations.Target;
 import org.globsframework.core.metamodel.fields.GlobArrayField;
 import org.globsframework.core.metamodel.fields.GlobField;
@@ -205,7 +205,7 @@ public class DefaultDbGraphqlQueryTest {
     public static class Humain {
         public static GlobType TYPE;
 
-        @KeyField
+        @KeyField_
         public static StringField uuid;
 
         public static StringField firstName;
@@ -220,7 +220,7 @@ public class DefaultDbGraphqlQueryTest {
     public static class DbHumain {
         public static GlobType TYPE;
 
-        @KeyField
+        @KeyField_
         public static StringField uuid;
 
         public static StringField firstName;
