@@ -38,7 +38,6 @@ public class GQLGlobFieldBuilder extends GqlGlobBuilderWithError {
         return instantiate;
     }
 
-    @Override
     public GqlGlobBuilder getSubBuilder() {
         if (field instanceof GlobArrayField) {
             return new GQLGlobSelection(((GlobArrayField) field).getTargetType(), model, (gqlGlobType) -> {
@@ -52,7 +51,6 @@ public class GQLGlobFieldBuilder extends GqlGlobBuilderWithError {
         throw new RuntimeException("selection not expected on " + field.getName());
     }
 
-    @Override
     public void complete() {
         consumer.accept(new GqlField(new QGLFieldWithParameter(field, Optional.ofNullable(parameters)), gqlGlobType));
     }
