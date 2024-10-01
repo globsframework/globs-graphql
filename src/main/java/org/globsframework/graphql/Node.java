@@ -8,9 +8,11 @@ import org.globsframework.core.model.AbstractFieldSetter;
 import org.globsframework.core.model.FieldSetter;
 import org.globsframework.core.model.Glob;
 import org.globsframework.core.model.MutableGlob;
-import org.globsframework.core.utils.collections.MultiMap;
+import org.globsframework.core.utils.collections.ConcurrentMultiMap;
 import org.globsframework.core.utils.exceptions.ItemNotFound;
 import org.globsframework.graphql.model.GQLMandatory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -18,9 +20,10 @@ import java.util.List;
 import java.util.Optional;
 
 public class Node {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Node.class);
     public final Glob data;
     private final GQLGlobType glQuery;
-    private MultiMap<Field, Node> children = new MultiMap<>();
+    private final ConcurrentMultiMap<Field, Node> children = new ConcurrentMultiMap<>();
 
     public Node(GQLGlobType glQuery, Glob data) {
         this.glQuery = glQuery;
@@ -56,7 +59,7 @@ public class Node {
         glQuery.aliasToField.forEach((field, gqlField) -> {
             if (gqlField.gqlGlobType() != null) {
                 List<Node> nodes = children.get(field);
-                if (!nodes.isEmpty()) {
+                if (nodes != null && !nodes.isEmpty()) {
                     Node firstNode = nodes.get(0);
                     if (field instanceof GlobField globField) {
                         out.set(globField, firstNode.buildResponse(gqlGlobCallerBuilder));

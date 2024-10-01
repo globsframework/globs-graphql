@@ -109,7 +109,9 @@ public class DefaultDbGraphqlQuery implements DbGraphqlQuery {
             skip.map(queryBuilder::skip);
             SelectQuery query = queryBuilder.selectAll().getQuery();
             final CountConsumer count = new CountConsumer(top.orElse(-1), consumer, idField);
-            query.executeAsGlobStream().forEach(count);
+            try (Stream<Glob> globStream = query.executeAsGlobStream()) {
+                globStream.forEach(count);
+            }
             boolean hasNext = top.map(m -> m + 1 == count.count).orElse(false);
             return new CursorPosition(count.count != 0 && hasPrevious, hasNext);
         } catch (Exception e) {

@@ -303,7 +303,9 @@ public class AntlrGQLVisitor extends GraphqlBaseVisitor<AntlrGQLVisitor> {
 //            Arguments arguments = new Arguments(mutableGlob, variables);
             jsonBuilder.visitArguments(ctx);
             final String s = stringBuilder.toString();
-            LOGGER.info("Gson " + s);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Gson " + s);
+            }
             GSonUtils.decode(new StringReader(s), mutableGlob.getType(), mutableGlob);
             return this;
         }

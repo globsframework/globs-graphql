@@ -218,7 +218,7 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
             if (current.isEmpty()) {
                 return CompletableFuture.completedFuture(null);
             }
-            List<CompletableFuture<Void>> futurs = new ArrayList<>();
+            List<CompletableFuture<Void>> futures = new ArrayList<>();
             for (Map.Entry<Field, GqlField> entry : glQuery.aliasToField.entrySet()) {
                 final GqlField gqlField = entry.getValue();
                 final Field outField = entry.getKey();
@@ -229,7 +229,7 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
                 final ConnectionInfo<C> connection = connections.get(field);
                 if (connection != null) {
                     List<Node> newNode = new ArrayList<>();
-                    futurs.add(manageConnection(outField, gqlField, connection, current, callContext, newNode)
+                    futures.add(manageConnection(outField, gqlField, connection, current, callContext, newNode)
                             .thenComposeAsync(gqlType -> deepScan(gqlType, callContext, newNode), executor));
                 } else {
                     GQLGlobLoad<C> gqlGlobLoad = loaders.get(field);
@@ -243,7 +243,7 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
                                 CompletableFuture.completedFuture(null)
                                         .thenComposeAsync(a -> gqlGlobLoad.load(gqlField, callContext, parents), executor)
                                         .thenComposeAsync(unused -> deepScan(gqlField.gqlGlobType(), callContext, newNode), executor);
-                        futurs.add(future);
+                        futures.add(future);
                     } else {
                         Map<GlobType, GQLKeyExtractor<C>> gqlKeyExtractors = keyExtractors.get(field);
                         if (!gqlKeyExtractors.isEmpty()) {
@@ -290,7 +290,7 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
                                             }
                                             return CompletableFuture.allOf(keyFutures.toArray(CompletableFuture[]::new));
                                         }, executor);
-                                futurs.add(future);
+                                futures.add(future);
                             }
                         } else {
                             LOGGER.warn("no loader for " + field);
@@ -298,7 +298,7 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
                     }
                 }
             }
-            return CompletableFuture.allOf(futurs.toArray(CompletableFuture[]::new));
+            return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
         }
 
         record PageInfoField(GlobType pageType, StringField startCursor, BooleanField hasNextPage,

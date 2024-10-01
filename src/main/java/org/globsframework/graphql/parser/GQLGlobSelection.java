@@ -46,7 +46,7 @@ public class GQLGlobSelection extends GqlGlobBuilderWithError {
                     Field f;
 
                     public void notManaged(Field field) throws Exception {
-                        f = outputTypeBuilder.declare(alias, field.getDataType(), field.streamAnnotations().collect(Collectors.toList()));
+                        f = outputTypeBuilder.declareFrom(alias, field);
                     }
 
                     public void visitGlob(GlobField field) throws Exception {
