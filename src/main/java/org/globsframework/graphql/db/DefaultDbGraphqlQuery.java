@@ -108,7 +108,7 @@ public class DefaultDbGraphqlQuery implements DbGraphqlQuery {
             }
             skip.map(queryBuilder::skip);
             SelectQuery query = queryBuilder.selectAll().getQuery();
-            final CountConsumer count = new CountConsumer(top.orElse(-1), consumer, idField);
+            final CountAndFilterConsumer count = new CountAndFilterConsumer(top.orElse(-1), consumer, idField);
             try (Stream<Glob> globStream = query.executeAsGlobStream()) {
                 globStream.forEach(count);
             }
@@ -121,13 +121,13 @@ public class DefaultDbGraphqlQuery implements DbGraphqlQuery {
         }
     }
 
-    public static class CountConsumer implements Consumer<Glob> {
-        int count = 0;
-        private int maxCount;
-        private Consumer<Glob> next;
-        private Field idField;
+    public static class CountAndFilterConsumer implements Consumer<Glob> {
+        private final int maxCount;
+        private final Consumer<Glob> next;
+        private final Field idField;
+        private int count = 0;
 
-        public CountConsumer(int maxCount, Consumer<Glob> next, Field idField) {
+        public CountAndFilterConsumer(int maxCount, Consumer<Glob> next, Field idField) {
             this.maxCount = maxCount;
             this.next = next;
             this.idField = idField;
