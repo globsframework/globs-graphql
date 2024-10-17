@@ -27,23 +27,23 @@ public class GlobSchemaGeneratorTest extends TestCase {
                         """));
         Assert.assertTrue(s.contains("""
                 type Query {
-                humain(id:String) : human
+                humain(id:String) : Human
                 humains(first:Int, after:String, orderBy:String, order:String, startedAt:DateTime) : HumanConnection
-                complexHumains(who:String, subInfo:subinfo) : HumanConnection
+                complexHumains(who:String, subInfo:Subinfo) : HumanConnection
                 }
                 """));
         Assert.assertTrue(s.contains("""
-                type human {
+                type Human {
                 id : ID
                 surName : String
                 firstName : String
                 lastName : String
-                birthDate : birthDate
-                friends(sort:String, name:[String]) : [human]
+                birthDate : BirthDate
+                friends(sort:String, name:[String]) : [Human]
                 }
                 """));
         Assert.assertTrue(s.contains("""
-                type birthDate {
+                type BirthDate {
                 day : Int
                 month : Int
                 year : Int
@@ -58,7 +58,7 @@ public class GlobSchemaGeneratorTest extends TestCase {
                 """));
         Assert.assertTrue(s.contains("""
                 type HumanEdge {
-                node : human
+                node : Human
                 cursor : String
                 }
                 """));
@@ -72,17 +72,17 @@ public class GlobSchemaGeneratorTest extends TestCase {
                 """));
         Assert.assertTrue(s.contains("""
                 type Mutation {
-                createHumain(humain:humanInput) : human
+                createHumain(humain:HumanInput) : Human
                 }
                 """));
         Assert.assertTrue(s.contains("""
-                input humanInput {
+                input HumanInput {
                 firstName : String
                 lastName : String
                 }
                 """));
         Assert.assertTrue(s.contains("""
-                input subinfo {
+                input Subinfo {
                 firstName : String
                 lastName : String
                 }
