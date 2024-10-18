@@ -195,6 +195,8 @@ public class DefaultDbGraphqlQueryTest {
             @Target(Humain.class)
             public static GlobField node;
 
+            public static StringField cursor;
+
             static {
                 GlobTypeLoaderFactory.create(Hedge.class).load();
             }

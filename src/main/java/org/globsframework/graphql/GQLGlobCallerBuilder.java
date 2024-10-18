@@ -33,6 +33,7 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
     private final MapOfMaps<Field, GlobType, GQLGlobFieldMapper> fieldMapper = new MapOfMaps<>();
     private final MapOfMaps<GlobType, FunctionalKeyBuilder, GQLGlobFetcher<C>> fetchers = new MapOfMaps<>();
     private final MapOfMaps<Field, GlobType, GQLKeyExtractor<C>> keyExtractors = new MapOfMaps<>();
+    private final Map<GlobType, SourceConnectionInfo> sourceConnectionInfoMap = new HashMap<>();
 
     public GQLGlobCallerBuilder() {
         this.executor = Runnable::run;
@@ -199,6 +200,14 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
         }
     }
 
+    public record SourceConnectionInfo(Optional<IntegerField> total, GlobField pageInfo, GlobType edgeType,
+                                       GlobArrayField edges, GlobField node, Optional<StringField> cursor,
+                                       GlobType sourceDataType, PageInfoField pageInfoField) {
+    }
+    record PageInfoField(GlobType pageType, StringField startCursor, BooleanField hasNextPage,
+                         StringField endCursor, BooleanField hasPreviousPage) {
+    }
+
     private class DefaultGQLGlobCaller implements GQLGlobCaller<C> {
         private final GQLQueryParser gqlQueryParser;
 
@@ -301,10 +310,6 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
             return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
         }
 
-        record PageInfoField(GlobType pageType, StringField startCursor, BooleanField hasNextPage,
-                             StringField endCursor, BooleanField hasPreviousPage) {
-        }
-
         static PageInfoField extract(GlobType pageType) {
             final StringField startCursor = pageType.findOptField(GQLPageInfo.startCursor.getName()).map(Field::asStringField).orElse(null);
             final StringField endCursor = pageType.findOptField(GQLPageInfo.endCursor.getName()).map(Field::asStringField).orElse(null);
@@ -313,17 +318,32 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
             return new PageInfoField(pageType, startCursor, hasNextPage, endCursor, hasPreviousPage);
         }
 
+        SourceConnectionInfo getSourceConnectionInfo(GlobType connectionType) {
+            return sourceConnectionInfoMap.computeIfAbsent(connectionType, field ->
+            {
+                Optional<IntegerField> total = connectionType.findOptField("totalCount").map(Field::asIntegerField);
+                GlobField pageInfo = connectionType.getField("pageInfo").asGlobField();
+                GlobArrayField edges = connectionType.getField("edges").asGlobArrayField();
+                Optional<StringField> cursor = edges.getTargetType().findOptField("cursor").map(Field::asStringField);
+                GlobField node = edges.getTargetType().getField("node").asGlobField();
+                GlobType sourceDataType = node.getTargetType();
+                return new SourceConnectionInfo(total, pageInfo, edges.getTargetType(), edges,
+                        node, cursor, sourceDataType, extract(pageInfo.getTargetType()));
+            });
+        }
+
         private CompletableFuture<GQLGlobType> manageConnection(Field outField, GqlField gqlField, ConnectionInfo<C> connectionInfo,
                                                                 List<Node> current, C callContext, List<Node> newNode) {
             GQLGlobConnectionLoad<C> loader = connectionInfo.globLoad();
             GQLGlobType nodeType = null;
+            SourceConnectionInfo sourceConnectionInfo = getSourceConnectionInfo(gqlField.gqlGlobType().type);
             for (Node node : current) {
                 List<Glob> values = new ArrayList<>();
                 Ref<GQLGlobConnectionLoad.CursorInfo> cursorInfoRef = new Ref<>();
                 final CompletableFuture<Void> completableFuture = loader.load(gqlField, callContext,
                         List.of(new GQLGlobConnectionLoad.OnConnectionLoad(node.data, values::add, cursorInfoRef::set)));
                 completableFuture.join();
-                final MutableGlob connectionData = gqlField.gqlGlobType().outputType.instantiate();
+                final MutableGlob connectionData = gqlField.gqlGlobType().type.instantiate();
                 final Node connectionNode = node.addChild(outField, gqlField.gqlGlobType(), connectionData);
                 final Optional<IntegerField> total = gqlField.gqlGlobType().outputType.findOptField("totalCount").map(Field::asIntegerField);
                 final Optional<GlobField> pageInfoField = gqlField.gqlGlobType().outputType.findOptField("pageInfo").map(Field::asGlobField);
@@ -333,28 +353,28 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
                 final Optional<GlobField> edgeNode = edgesType.map(t -> t.findField("node")).map(Field::asGlobField);
                 final Optional<StringField> edgeCursor = edgesType.map(t -> t.findField("cursor")).map(Field::asStringField);
                 final Optional<GqlField> pageInfoGQLField = pageInfoField.map(pi -> gqlField.gqlGlobType().aliasToField.get(pi));
-                final Optional<MutableGlob> pageInfo = pageInfoField.map(globField -> globField.getTargetType().instantiate());
 
                 Glob first = null;
                 Glob last = null;
                 if (edgesField.isPresent() && edgesType.isPresent()) {
                     final GqlField edgeGQLField = gqlField.gqlGlobType().aliasToField.get(edgesField.get());
-                    boolean withCursor = edgeCursor.isPresent();
-                    Optional<GqlField> nodeGqlField = edgeNode.map(en -> edgeGQLField.gqlGlobType().aliasToField.get(en));
-                    if (nodeGqlField.isPresent()) {
-                        nodeType = nodeGqlField.get().gqlGlobType();
-                        for (Glob value : values) {
-                            if (first == null) {
-                                first = value;
-                            }
-                            last = value;
-                            final MutableGlob edge = edgesType.get().instantiate();
-                            if (withCursor) {
-                                final MutableGlob st = getCursor(gqlField, connectionInfo, value, value.getType())
-                                        .set(CursorType.lastId, value.get(connectionInfo.uuidField()));
-                                edge.set(edgeCursor.get(), Base64.getEncoder().encodeToString(GSonUtils.encode(st, true).getBytes(StandardCharsets.UTF_8)));
-                            }
-//                    edge.set(edgeNode, value);
+                        boolean withCursor = edgeCursor.isPresent();
+                        Optional<GqlField> nodeGqlField = edgeNode.map(en -> edgeGQLField.gqlGlobType().aliasToField.get(en));
+                        if (nodeGqlField.isPresent()) {
+                            nodeType = nodeGqlField.get().gqlGlobType();
+                            for (Glob value : values) {
+                                if (first == null) {
+                                    first = value;
+                                }
+                                last = value;
+                                final MutableGlob edge = sourceConnectionInfo.edgeType.instantiate();
+                                Optional<StringField> sourceCursor = sourceConnectionInfo.cursor();
+                                if (withCursor && sourceCursor.isPresent()) {
+                                    final MutableGlob st = getCursor(gqlField, connectionInfo, value, value.getType())
+                                            .set(CursorType.lastId, value.get(connectionInfo.uuidField()));
+                                    edge.set(sourceCursor.get(),
+                                            Base64.getEncoder().encodeToString(GSonUtils.encode(st, true).getBytes(StandardCharsets.UTF_8)));
+                                }
                             newNode.add(
                                     connectionNode
                                             .addChild(edgesField.get(), edgeGQLField.gqlGlobType(), edge)
@@ -362,12 +382,14 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
                         }
                     }
                 }
+                MutableGlob pageInfo = pageInfoType.map(x -> sourceConnectionInfo.pageInfoField().pageType.instantiate())
+                        .orElse(null);
                 if (first != null) {
                     GlobType innerType = first.getType();
                     if (pageInfoType.isPresent() && pageInfoType.get().startCursor != null) {
                         final MutableGlob st = getCursor(gqlField, connectionInfo, first, innerType)
                                 .set(CursorType.lastId, first.get(connectionInfo.uuidField()));
-                        pageInfo.get().set(pageInfoType.get().startCursor, Base64.getEncoder().encodeToString(GSonUtils.encode(st, true).getBytes(StandardCharsets.UTF_8)));
+                        pageInfo.set(sourceConnectionInfo.pageInfoField().startCursor, Base64.getEncoder().encodeToString(GSonUtils.encode(st, true).getBytes(StandardCharsets.UTF_8)));
                     }
                 }
                 if (last != null) {
@@ -375,23 +397,23 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
                     if (pageInfoType.isPresent() && pageInfoType.get().endCursor != null) {
                         final MutableGlob st = getCursor(gqlField, connectionInfo, last, innerType)
                                 .set(CursorType.lastId, last.get(connectionInfo.uuidField()));
-                        pageInfo.get().set(pageInfoType.get().endCursor, Base64.getEncoder().encodeToString(GSonUtils.encode(st, true).getBytes(StandardCharsets.UTF_8)));
+                        pageInfo.set(sourceConnectionInfo.pageInfoField().endCursor, Base64.getEncoder().encodeToString(GSonUtils.encode(st, true).getBytes(StandardCharsets.UTF_8)));
                     }
                 }
 
                 if (cursorInfoRef.get() != null && pageInfoType.isPresent()) {
                     if (pageInfoType.get().hasNextPage != null) {
-                        pageInfo.get().set(pageInfoType.get().hasNextPage, cursorInfoRef.get().hasNext());
+                        pageInfo.set(sourceConnectionInfo.pageInfoField().hasNextPage, cursorInfoRef.get().hasNext());
                     }
                     if (pageInfoType.get().hasPreviousPage != null) {
-                        pageInfo.get().set(pageInfoType.get().hasPreviousPage, cursorInfoRef.get().hasPrevious());
+                        pageInfo.set(sourceConnectionInfo.pageInfoField().hasPreviousPage, cursorInfoRef.get().hasPrevious());
                     }
                 }
                 if (pageInfoGQLField.isPresent()) {
-                    connectionNode.addChild(pageInfoField.get(), pageInfoGQLField.get().gqlGlobType(), pageInfo.get());
+                    connectionNode.addChild(pageInfoField.get(), pageInfoGQLField.get().gqlGlobType(), pageInfo);
                 }
-                if (cursorInfoRef.get() != null && total.isPresent()) {
-                    connectionData.setValue(total.get(), cursorInfoRef.get().totalCount());
+                if (cursorInfoRef.get() != null && total.isPresent() && sourceConnectionInfo.total.isPresent()) {
+                    connectionData.setValue(sourceConnectionInfo.total.get(), cursorInfoRef.get().totalCount());
                 }
             }
             return CompletableFuture.completedFuture(nodeType);
