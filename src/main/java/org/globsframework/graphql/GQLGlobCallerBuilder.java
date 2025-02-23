@@ -4,8 +4,9 @@ import org.globsframework.core.functional.FunctionalKey;
 import org.globsframework.core.functional.FunctionalKeyBuilder;
 import org.globsframework.core.metamodel.GlobModel;
 import org.globsframework.core.metamodel.GlobType;
-import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
+import org.globsframework.core.metamodel.GlobTypeBuilder;
 import org.globsframework.core.metamodel.fields.*;
+import org.globsframework.core.metamodel.impl.DefaultGlobTypeBuilder;
 import org.globsframework.core.model.FieldValuesAccessor;
 import org.globsframework.core.model.Glob;
 import org.globsframework.core.model.MutableGlob;
@@ -189,14 +190,19 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
     }
 
     public static class CursorType {
-        public static GlobType TYPE;
+        public static final GlobType TYPE;
 
-        public static StringField lastId;
+        public static final StringField lastId;
 
-        public static StringField lastOrderValue;
+        public static final StringField lastOrderValue;
 
         static {
-            GlobTypeLoaderFactory.create(CursorType.class).load();
+            GlobTypeBuilder typeBuilder = new DefaultGlobTypeBuilder("Cursor");
+            TYPE = typeBuilder.unCompleteType();
+            lastId = typeBuilder.declareStringField("lastId");
+            lastOrderValue = typeBuilder.declareStringField("lastOrderValue");
+            typeBuilder.complete();
+//            GlobTypeLoaderFactory.create(CursorType.class).load();
         }
     }
 
@@ -204,6 +210,7 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
                                        GlobArrayField edges, GlobField node, Optional<StringField> cursor,
                                        GlobType sourceDataType, PageInfoField pageInfoField) {
     }
+
     record PageInfoField(GlobType pageType, StringField startCursor, BooleanField hasNextPage,
                          StringField endCursor, BooleanField hasPreviousPage) {
     }
@@ -358,23 +365,23 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
                 Glob last = null;
                 if (edgesField.isPresent() && edgesType.isPresent()) {
                     final GqlField edgeGQLField = gqlField.gqlGlobType().aliasToField.get(edgesField.get());
-                        boolean withCursor = edgeCursor.isPresent();
-                        Optional<GqlField> nodeGqlField = edgeNode.map(en -> edgeGQLField.gqlGlobType().aliasToField.get(en));
-                        if (nodeGqlField.isPresent()) {
-                            nodeType = nodeGqlField.get().gqlGlobType();
-                            for (Glob value : values) {
-                                if (first == null) {
-                                    first = value;
-                                }
-                                last = value;
-                                final MutableGlob edge = sourceConnectionInfo.edgeType.instantiate();
-                                Optional<StringField> sourceCursor = sourceConnectionInfo.cursor();
-                                if (withCursor && sourceCursor.isPresent()) {
-                                    final MutableGlob st = getCursor(gqlField, connectionInfo, value, value.getType())
-                                            .set(CursorType.lastId, value.get(connectionInfo.uuidField()));
-                                    edge.set(sourceCursor.get(),
-                                            Base64.getEncoder().encodeToString(GSonUtils.encode(st, true).getBytes(StandardCharsets.UTF_8)));
-                                }
+                    boolean withCursor = edgeCursor.isPresent();
+                    Optional<GqlField> nodeGqlField = edgeNode.map(en -> edgeGQLField.gqlGlobType().aliasToField.get(en));
+                    if (nodeGqlField.isPresent()) {
+                        nodeType = nodeGqlField.get().gqlGlobType();
+                        for (Glob value : values) {
+                            if (first == null) {
+                                first = value;
+                            }
+                            last = value;
+                            final MutableGlob edge = sourceConnectionInfo.edgeType.instantiate();
+                            Optional<StringField> sourceCursor = sourceConnectionInfo.cursor();
+                            if (withCursor && sourceCursor.isPresent()) {
+                                final MutableGlob st = getCursor(gqlField, connectionInfo, value, value.getType())
+                                        .set(CursorType.lastId, value.get(connectionInfo.uuidField()));
+                                edge.set(sourceCursor.get(),
+                                        Base64.getEncoder().encodeToString(GSonUtils.encode(st, true).getBytes(StandardCharsets.UTF_8)));
+                            }
                             newNode.add(
                                     connectionNode
                                             .addChild(edgesField.get(), edgeGQLField.gqlGlobType(), edge)

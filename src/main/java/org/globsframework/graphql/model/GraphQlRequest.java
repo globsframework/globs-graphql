@@ -1,20 +1,27 @@
 package org.globsframework.graphql.model;
 
 import org.globsframework.core.metamodel.GlobType;
-import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
+import org.globsframework.core.metamodel.GlobTypeBuilder;
 import org.globsframework.core.metamodel.fields.StringField;
+import org.globsframework.core.metamodel.impl.DefaultGlobTypeBuilder;
+import org.globsframework.json.annottations.IsJsonContent;
 import org.globsframework.json.annottations.IsJsonContent_;
 
 public class GraphQlRequest {
-    public static GlobType TYPE;
+    public static final GlobType TYPE;
 
-    public static StringField query;
+    public static final StringField query;
 
     @IsJsonContent_
-    public static StringField variables;
+    public static final StringField variables;
 
     static {
-        GlobTypeLoaderFactory.create(GraphQlRequest.class).load();
+        GlobTypeBuilder typeBuilder = new DefaultGlobTypeBuilder("GraphQlRequest");
+        TYPE = typeBuilder.unCompleteType();
+        query = typeBuilder.declareStringField("query");
+        variables = typeBuilder.declareStringField("variables", IsJsonContent.UNIQUE_GLOB);
+        typeBuilder.complete();
+//        GlobTypeLoaderFactory.create(GraphQlRequest.class).load();
     }
 }
 
