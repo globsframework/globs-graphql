@@ -42,7 +42,7 @@ public class GQLGlobCallerBuilderTest extends TestCase {
         id = defaultGlobTypeBuilder.declareStringField("id", KeyField.create(0));
 
         globRepository = new DefaultGlobRepository();
-        humainType = defaultGlobTypeBuilder.get();
+        humainType = defaultGlobTypeBuilder.build();
     }
 
     public void testLoad() {

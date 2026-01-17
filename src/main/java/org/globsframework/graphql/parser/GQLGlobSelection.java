@@ -32,7 +32,7 @@ public class GQLGlobSelection extends GqlGlobBuilderWithError {
     }
 
     public void complete() {
-        consumer.complete(new GQLGlobType(type, outputTypeBuilder.get(), aliasToField));
+        consumer.complete(new GQLGlobType(type, outputTypeBuilder.build(), aliasToField));
     }
 
     public GqlGlobBuilder addSub(String fieldName, String alias) {
@@ -54,7 +54,7 @@ public class GQLGlobSelection extends GqlGlobBuilderWithError {
                         if (gqlGlobType == null) {
                             throw new RuntimeException("Missing attribute under " + fieldName);
                         }
-                        f = outputTypeBuilder.declareGlobField(alias, gqlGlobType.outputType, field.streamAnnotations().collect(Collectors.toList()));
+                        f = outputTypeBuilder.declareGlobField(alias, () -> gqlGlobType.outputType, field.streamAnnotations().collect(Collectors.toList()));
                     }
 
                     public void visitGlobArray(GlobArrayField field) throws Exception {
@@ -62,7 +62,7 @@ public class GQLGlobSelection extends GqlGlobBuilderWithError {
                         if (gqlGlobType == null) {
                             throw new RuntimeException("Missing attribute under " + fieldName);
                         }
-                        f = outputTypeBuilder.declareGlobArrayField(alias, gqlGlobType.outputType, field.streamAnnotations().collect(Collectors.toList()));
+                        f = outputTypeBuilder.declareGlobArrayField(alias, () -> gqlGlobType.outputType, field.streamAnnotations().collect(Collectors.toList()));
                     }
 
                     public void visitUnionGlob(GlobUnionField field) throws Exception {

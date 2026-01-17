@@ -17,10 +17,8 @@ public class GraphQlResponse {
 
     static {
         GlobTypeBuilder typeBuilder = new DefaultGlobTypeBuilder("GraphQlResponse");
-        TYPE = typeBuilder.unCompleteType();
         data = typeBuilder.declareStringField("data", IsJsonContent.UNIQUE_GLOB);
         errorMessage = typeBuilder.declareStringField("errorMessage");
-        typeBuilder.complete();
-//        GlobTypeLoaderFactory.create(GraphQlResponse.class).load();
+        TYPE = typeBuilder.build();
     }
 }

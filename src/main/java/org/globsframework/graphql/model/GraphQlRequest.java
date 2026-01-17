@@ -17,11 +17,9 @@ public class GraphQlRequest {
 
     static {
         GlobTypeBuilder typeBuilder = new DefaultGlobTypeBuilder("GraphQlRequest");
-        TYPE = typeBuilder.unCompleteType();
         query = typeBuilder.declareStringField("query");
         variables = typeBuilder.declareStringField("variables", IsJsonContent.UNIQUE_GLOB);
-        typeBuilder.complete();
-//        GlobTypeLoaderFactory.create(GraphQlRequest.class).load();
+        TYPE = typeBuilder.build();
     }
 }
 

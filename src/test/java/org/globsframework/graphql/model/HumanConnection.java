@@ -1,7 +1,8 @@
 package org.globsframework.graphql.model;
 
 import org.globsframework.core.metamodel.GlobType;
-import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
+import org.globsframework.core.metamodel.GlobTypeBuilder;
+import org.globsframework.core.metamodel.GlobTypeBuilderFactory;
 import org.globsframework.core.metamodel.annotations.Target;
 import org.globsframework.core.metamodel.fields.GlobArrayField;
 import org.globsframework.core.metamodel.fields.GlobField;
@@ -19,6 +20,10 @@ public class HumanConnection {
     public static GlobField pageInfo;
 
     static {
-        GlobTypeLoaderFactory.create(HumanConnection.class, "HumanConnection").load();
+        GlobTypeBuilder builder = GlobTypeBuilderFactory.create("HumanConnection");
+        totalCount = builder.declareIntegerField("totalCount");
+        edges = builder.declareGlobArrayField("edges", () -> HumanEdgeConnection.TYPE);
+        pageInfo = builder.declareGlobField("pageInfo", () -> GQLPageInfo.TYPE);
+        TYPE = builder.build();
     }
 }

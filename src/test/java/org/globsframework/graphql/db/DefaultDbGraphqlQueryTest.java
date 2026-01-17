@@ -1,8 +1,10 @@
 package org.globsframework.graphql.db;
 
 import org.globsframework.core.metamodel.GlobType;
-import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
+import org.globsframework.core.metamodel.GlobTypeBuilder;
+import org.globsframework.core.metamodel.GlobTypeBuilderFactory;
 import org.globsframework.core.metamodel.annotations.InitUniqueGlob;
+import org.globsframework.core.metamodel.annotations.KeyField;
 import org.globsframework.core.metamodel.annotations.KeyField_;
 import org.globsframework.core.metamodel.annotations.Target;
 import org.globsframework.core.metamodel.fields.GlobArrayField;
@@ -14,9 +16,7 @@ import org.globsframework.core.model.Glob;
 import org.globsframework.graphql.GQLGlobCaller;
 import org.globsframework.graphql.GQLGlobCallerBuilder;
 import org.globsframework.graphql.GQLGlobConnectionLoad;
-import org.globsframework.graphql.model.GQLMandatory_;
-import org.globsframework.graphql.model.GQLPageInfo;
-import org.globsframework.graphql.model.GQLQueryParam_;
+import org.globsframework.graphql.model.*;
 import org.globsframework.graphql.parser.GqlField;
 import org.globsframework.json.GSonUtils;
 import org.globsframework.sql.drivers.jdbc.JdbcConnection;
@@ -132,7 +132,9 @@ public class DefaultDbGraphqlQueryTest {
         public static GlobField query;
 
         static {
-            GlobTypeLoaderFactory.create(SchemaType.class).load();
+            GlobTypeBuilder builder = GlobTypeBuilderFactory.create("Schema");
+            query = builder.declareGlobField("query", () -> HumainQuery.TYPE);
+            TYPE = builder.build();
         }
     }
 
@@ -144,7 +146,9 @@ public class DefaultDbGraphqlQueryTest {
         public static GlobField humains;
 
         static {
-            GlobTypeLoaderFactory.create(HumainQuery.class).load();
+            GlobTypeBuilder builder = GlobTypeBuilderFactory.create("HumainQuery");
+            humains = builder.declareGlobField("humains", () -> Connection.TYPE, GQLQueryParam.create(Parameter.TYPE));
+            TYPE = builder.build();
         }
 
         public static class Parameter {
@@ -168,7 +172,16 @@ public class DefaultDbGraphqlQueryTest {
             public static StringField orderBy; //
 
             static {
-                GlobTypeLoaderFactory.create(Parameter.class).load();
+                GlobTypeBuilder builder = GlobTypeBuilderFactory.create("Parameter");
+                first = builder.declareIntegerField("first");
+                after = builder.declareStringField("after");
+                last = builder.declareIntegerField("last");
+                before = builder.declareStringField("before");
+                skip = builder.declareIntegerField("skip");
+                order = builder.declareStringField("order");
+                orderBy = builder.declareStringField("orderBy");
+                TYPE = builder.build();
+                EMPTY = TYPE.instantiate();
             }
         }
 
@@ -185,7 +198,11 @@ public class DefaultDbGraphqlQueryTest {
             public static GlobField pageInfo;
 
             static {
-                GlobTypeLoaderFactory.create(Connection.class).load();
+                GlobTypeBuilder builder = GlobTypeBuilderFactory.create("Connection");
+                totalCount = builder.declareIntegerField("totalCount");
+                edges = builder.declareGlobArrayField("edges", () -> Hedge.TYPE);
+                pageInfo = builder.declareGlobField("pageInfo", () -> GQLPageInfo.TYPE, GQLMandatory.UNIQUE);
+                TYPE = builder.build();
             }
         }
 
@@ -198,7 +215,10 @@ public class DefaultDbGraphqlQueryTest {
             public static StringField cursor;
 
             static {
-                GlobTypeLoaderFactory.create(Hedge.class).load();
+                GlobTypeBuilder builder = GlobTypeBuilderFactory.create("Hedge");
+                node = builder.declareGlobField("node", () -> Humain.TYPE);
+                cursor = builder.declareStringField("cursor");
+                TYPE = builder.build();
             }
         }
 
@@ -215,7 +235,11 @@ public class DefaultDbGraphqlQueryTest {
         public static StringField lastName;
 
         static {
-            GlobTypeLoaderFactory.create(Humain.class).load();
+            GlobTypeBuilder builder = GlobTypeBuilderFactory.create("Humain");
+            uuid = builder.declareStringField("uuid", KeyField.ZERO);
+            firstName = builder.declareStringField("firstName");
+            lastName = builder.declareStringField("lastName");
+            TYPE = builder.build();
         }
     }
 
@@ -230,7 +254,11 @@ public class DefaultDbGraphqlQueryTest {
         public static StringField lastName;
 
         static {
-            GlobTypeLoaderFactory.create(DbHumain.class).load();
+            GlobTypeBuilder builder = GlobTypeBuilderFactory.create("DbHumain");
+            uuid = builder.declareStringField("uuid", KeyField.ZERO);
+            firstName = builder.declareStringField("firstName");
+            lastName = builder.declareStringField("lastName");
+            TYPE = builder.build();
         }
     }
 }

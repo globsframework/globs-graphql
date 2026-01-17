@@ -21,12 +21,10 @@ public class GQLPageInfo {
 
     static {
         GlobTypeBuilder typeBuilder = new DefaultGlobTypeBuilder("GQLPageInfo");
-        TYPE = typeBuilder.unCompleteType();
         startCursor = typeBuilder.declareStringField("startCursor");
         endCursor = typeBuilder.declareStringField("endCursor");
         hasNextPage = typeBuilder.declareBooleanField("hasNextPage", GQLMandatory.UNIQUE);
         hasPreviousPage = typeBuilder.declareBooleanField("hasPreviousPage", GQLMandatory.UNIQUE);
-        typeBuilder.complete();
-//        GlobTypeLoaderFactory.create(GQLPageInfo.class, "GQLPageInfo").load();
+        TYPE = typeBuilder.build();
     }
 }
