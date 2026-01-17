@@ -1,7 +1,9 @@
 package org.globsframework.graphql.model;
 
 import org.globsframework.core.metamodel.GlobType;
-import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
+import org.globsframework.core.metamodel.GlobTypeBuilder;
+import org.globsframework.core.metamodel.GlobTypeBuilderFactory;
+import org.globsframework.core.metamodel.annotations.KeyField;
 import org.globsframework.core.metamodel.annotations.KeyField_;
 import org.globsframework.core.metamodel.annotations.Target;
 import org.globsframework.core.metamodel.fields.*;
@@ -36,12 +38,22 @@ public class Human {
         public static StringArrayField name;
 
         static {
-            GlobTypeLoaderFactory.create(FriendQueryParam.class).load();
+            GlobTypeBuilder builder = GlobTypeBuilderFactory.create("FriendQueryParam");
+            sort = builder.declareStringField("sort");
+            name = builder.declareStringArrayField("name");
+            TYPE = builder.build();
         }
     }
 
     static {
-        GlobTypeLoaderFactory.create(Human.class).load();
+        GlobTypeBuilder builder = GlobTypeBuilderFactory.create("Human");
+        id = builder.declareStringField("id", KeyField.ZERO);
+        surName = builder.declareStringField("surName");
+        firstName = builder.declareStringField("firstName");
+        lastName = builder.declareStringField("lastName");
+        birthDate = builder.declareGlobField("birthDate", () -> BirthDate.TYPE);
+        friends = builder.declareGlobArrayField("friends", () -> Human.TYPE, GQLQueryParam.create(FriendQueryParam.TYPE));
+        TYPE = builder.build();
     }
 
     public static class BirthDate {
@@ -54,7 +66,11 @@ public class Human {
         public static IntegerField year;
 
         static {
-            GlobTypeLoaderFactory.create(BirthDate.class).load();
+            GlobTypeBuilder builder = GlobTypeBuilderFactory.create("BirthDate");
+            day = builder.declareIntegerField("day");
+            month = builder.declareIntegerField("month");
+            year = builder.declareIntegerField("year");
+            TYPE = builder.build();
         }
     }
 }

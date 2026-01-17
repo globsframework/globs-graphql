@@ -198,11 +198,9 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
 
         static {
             GlobTypeBuilder typeBuilder = new DefaultGlobTypeBuilder("Cursor");
-            TYPE = typeBuilder.unCompleteType();
             lastId = typeBuilder.declareStringField("lastId");
             lastOrderValue = typeBuilder.declareStringField("lastOrderValue");
-            typeBuilder.complete();
-//            GlobTypeLoaderFactory.create(CursorType.class).load();
+            TYPE = typeBuilder.build();
         }
     }
 

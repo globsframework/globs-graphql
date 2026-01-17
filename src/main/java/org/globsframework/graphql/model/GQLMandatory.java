@@ -21,13 +21,9 @@ public class GQLMandatory {
 
     static {
         GlobTypeBuilder typeBuilder = new DefaultGlobTypeBuilder("GQLMandatory");
-        TYPE = typeBuilder.unCompleteType();
-        typeBuilder.complete();
+        typeBuilder.register(GlobCreateFromAnnotation.class, annotation -> GQLMandatory.UNIQUE);
+        TYPE = typeBuilder.build();
         KEY = KeyBuilder.newEmptyKey(TYPE);
         UNIQUE = TYPE.instantiate();
-        typeBuilder.register(GlobCreateFromAnnotation.class, annotation -> UNIQUE);
-//        GlobTypeLoaderFactory.create(GQLMandatory.class, "GQLMandatory")
-//                .register(GlobCreateFromAnnotation.class, annotation -> UNIQUE)
-//                .load();
     }
 }

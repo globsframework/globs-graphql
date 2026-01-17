@@ -9,6 +9,7 @@ import org.globsframework.core.metamodel.impl.DefaultGlobTypeBuilder;
 import org.globsframework.core.model.Glob;
 import org.globsframework.core.model.Key;
 import org.globsframework.core.model.KeyBuilder;
+import org.globsframework.core.model.MutableGlob;
 
 public class GQLQueryParam {
     public static final GlobType TYPE;
@@ -20,29 +21,21 @@ public class GQLQueryParam {
 
     static {
         GlobTypeBuilder typeBuilder = new DefaultGlobTypeBuilder("GQLQueryParam");
-        TYPE = typeBuilder.unCompleteType();
         name = typeBuilder.declareStringField("name");
-        typeBuilder.complete();
-        KEY = KeyBuilder.newEmptyKey(TYPE);
-        typeBuilder.register(GlobCreateFromAnnotation.class, annotation -> {
-            try {
-                return TYPE.instantiate()
-                        .set(name, ((GlobType) ((GQLQueryParam_) annotation).value().getField("TYPE").get(null)).getName());
-            } catch (Exception e) {
-                throw new RuntimeException("Fail to extract TYPE");
-            }
-        })
+        typeBuilder.register(GlobCreateFromAnnotation.class,
+                annotation -> getMutableGlob((GQLQueryParam_) annotation))
         ;
-//        GlobTypeLoaderFactory.create(GQLQueryParam.class, "GQLQueryParam")
-//                .register(GlobCreateFromAnnotation.class, annotation -> {
-//                    try {
-//                        return TYPE.instantiate()
-//                                .set(name, ((GlobType) ((GQLQueryParam_) annotation).value().getField("TYPE").get(null)).getName());
-//                    } catch (Exception e) {
-//                        throw new RuntimeException("Fail to extract TYPE");
-//                    }
-//                })
-//                .load();
+        TYPE = typeBuilder.build();
+        KEY = KeyBuilder.newEmptyKey(TYPE);
+    }
+
+    private static MutableGlob getMutableGlob(GQLQueryParam_ annotation) {
+        try {
+            return TYPE.instantiate()
+                    .set(name, ((GlobType) annotation.value().getField("TYPE").get(null)).getName());
+        } catch (Exception e) {
+            throw new RuntimeException("Fail to extract TYPE");
+        }
     }
 
     public static Glob create(GlobType type) {

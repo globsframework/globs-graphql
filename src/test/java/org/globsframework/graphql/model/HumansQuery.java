@@ -1,7 +1,9 @@
 package org.globsframework.graphql.model;
 
 import org.globsframework.core.metamodel.GlobType;
-import org.globsframework.core.metamodel.GlobTypeLoaderFactory;
+import org.globsframework.core.metamodel.GlobTypeBuilder;
+import org.globsframework.core.metamodel.GlobTypeBuilderFactory;
+import org.globsframework.core.metamodel.annotations.KeyField;
 import org.globsframework.core.metamodel.annotations.KeyField_;
 import org.globsframework.core.metamodel.fields.DateTimeField;
 import org.globsframework.core.metamodel.fields.IntegerField;
@@ -22,6 +24,12 @@ public class HumansQuery {
     public static DateTimeField startedAt;
 
     static {
-        GlobTypeLoaderFactory.create(HumansQuery.class).load();
+        GlobTypeBuilder builder = GlobTypeBuilderFactory.create("HumansQuery");
+        first = builder.declareIntegerField("first", KeyField.ZERO);
+        after = builder.declareStringField("after");
+        orderBy = builder.declareStringField("orderBy");
+        order = builder.declareStringField("order");
+        startedAt = builder.declareDateTimeField("startedAt");
+        TYPE = builder.build();
     }
 }

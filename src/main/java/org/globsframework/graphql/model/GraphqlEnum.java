@@ -9,6 +9,7 @@ import org.globsframework.core.metamodel.fields.StringField;
 import org.globsframework.core.metamodel.impl.DefaultGlobTypeBuilder;
 import org.globsframework.core.model.Key;
 import org.globsframework.core.model.KeyBuilder;
+import org.globsframework.core.model.MutableGlob;
 
 public class GraphqlEnum {
     public static final GlobType TYPE;
@@ -22,22 +23,18 @@ public class GraphqlEnum {
 
     static {
         GlobTypeBuilder typeBuilder = new DefaultGlobTypeBuilder("GraphqlEnum");
-        TYPE = typeBuilder.unCompleteType();
         name = typeBuilder.declareStringField("name");
         values = typeBuilder.declareStringArrayField("values");
-        typeBuilder.register(GlobCreateFromAnnotation.class, annotation ->
-                TYPE.instantiate()
-                        .set(name, ((GraphqlEnum_) annotation).name())
-                        .set(values, ((GraphqlEnum_) annotation).values())
-        );
-        typeBuilder.complete();
+        typeBuilder.register(GlobCreateFromAnnotation.class,
+                annotation -> getMutableGlob((GraphqlEnum_) annotation));
+        TYPE = typeBuilder.build();
         UNIQUE_KEY = KeyBuilder.newEmptyKey(TYPE);
-//        GlobTypeLoader loader = GlobTypeLoaderFactory.create(GraphqlEnum.class, "GraphqlEnum");
-//        loader.register(GlobCreateFromAnnotation.class, annotation ->
-//                TYPE.instantiate()
-//                        .set(name, ((GraphqlEnum_) annotation).name())
-//                        .set(values, ((GraphqlEnum_) annotation).values())
-//        ).load();
+    }
+
+    private static MutableGlob getMutableGlob(GraphqlEnum_ annotation) {
+        return GraphqlEnum.TYPE.instantiate()
+                .set(name, annotation.name())
+                .set(values, annotation.values());
     }
 
 }
