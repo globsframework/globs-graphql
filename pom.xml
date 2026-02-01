@@ -7,7 +7,7 @@
     <packaging>jar</packaging>
     <artifactId>globs-graphql</artifactId>
     <name>globs graphql mapping</name>
-    <version>5.0.0</version>
+    <version>5.1-SNAPSHOT</version>
 
     <developers>
         <developer>
@@ -38,7 +38,7 @@
         <connection>scm:git:git@github.com:globsframework/globs-graphql</connection>
         <developerConnection>scm:git:git@github.com:globsframework/globs-graphql</developerConnection>
         <url>https://github.com/globsframework/globs-graphql</url>
-      <tag>5.0.0</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <profiles>
