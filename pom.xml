@@ -49,7 +49,7 @@
                     <plugin>
                         <groupId>org.sonatype.central</groupId>
                         <artifactId>central-publishing-maven-plugin</artifactId>
-                        <version>0.7.0</version>
+                        <version>0.8.0</version>
                         <extensions>true</extensions>
                         <configuration>
                             <publishingServerId>central</publishingServerId>
@@ -158,17 +158,17 @@
         <dependency>
             <groupId>org.globsframework</groupId>
             <artifactId>globs</artifactId>
-            <version>5.0.0</version>
+            <version>5.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.globsframework</groupId>
             <artifactId>globs-gson</artifactId>
-            <version>5.0.0</version>
+            <version>5.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.globsframework</groupId>
             <artifactId>globs-sql</artifactId>
-            <version>5.0.0</version>
+            <version>5.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
