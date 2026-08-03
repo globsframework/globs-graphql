@@ -13,7 +13,7 @@ public class ComplexHumansQuery {
     public static StringField who;
 
     @Target(Subinfo.class)
-    public static GlobField subInfo;
+    public static GlobField<Subinfo> subInfo;
 
     static {
         GlobTypeBuilder builder = GlobTypeBuilderFactory.create("ComplexHumansQuery");

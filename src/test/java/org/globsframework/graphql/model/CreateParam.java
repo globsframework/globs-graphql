@@ -11,7 +11,7 @@ public class CreateParam {
     public static GlobType TYPE;
 
     @Target(HumanInput.class)
-    public static GlobField humain;
+    public static GlobField<HumanInput> humain;
 
     static {
         GlobTypeBuilder builder = GlobTypeBuilderFactory.create("CreateParam");

@@ -60,10 +60,10 @@ public class Node {
             if (gqlField.gqlGlobType() != null) {
                 List<Node> nodes = children.get(field);
                 if (nodes != null && !nodes.isEmpty()) {
-                    Node firstNode = nodes.get(0);
-                    if (field instanceof GlobField globField) {
+                    Node firstNode = nodes.getFirst();
+                    if (field instanceof GlobField<?> globField) {
                         out.set(globField, firstNode.buildResponse(gqlGlobCallerBuilder));
-                    } else if (field instanceof GlobArrayField globArrayField) {
+                    } else if (field instanceof GlobArrayField<?> globArrayField) {
                         Glob[] res = new Glob[nodes.size()];
                         final Optional<Glob> parameters = gqlField.field().parameters();
                         final Optional<Comparator> comparator =
@@ -99,7 +99,7 @@ public class Node {
                         throw new RuntimeException("Not managed.");
                     }
                 } else {
-                    if (field.hasAnnotation(GQLMandatory.KEY) && field instanceof GlobArrayField globArrayField) {
+                    if (field.hasAnnotation(GQLMandatory.KEY) && field instanceof GlobArrayField<?> globArrayField) {
                         out.set(globArrayField, new Glob[0]);
                     }
                 }

@@ -11,7 +11,7 @@ public class HumanEdgeConnection {
     public static GlobType TYPE;
 
     @Target(Human.class)
-    public static GlobField node;
+    public static GlobField<Human> node;
 
     public static StringField cursor;
 

@@ -11,16 +11,16 @@ public class QueryType {
 
     @GQLQueryParam_(HumanQuery.class)
     @Target(Human.class)
-    public static GlobField humain;
+    public static GlobField<Human> humain;
 
     @GQLQueryParam_(HumansQuery.class)
     @Target(HumanConnection.class)
-    public static GlobField humains;
+    public static GlobField<HumanConnection> humains;
 
 
     @GQLQueryParam_(ComplexHumansQuery.class)
     @Target(HumanConnection.class)
-    public static GlobField complexHumains;
+    public static GlobField<HumanConnection> complexHumains;
 
 
     static {

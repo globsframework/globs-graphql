@@ -39,12 +39,12 @@ public class GQLGlobFieldBuilder extends GqlGlobBuilderWithError {
     }
 
     public GqlGlobBuilder getSubBuilder() {
-        if (field instanceof GlobArrayField) {
-            return new GQLGlobSelection(((GlobArrayField) field).getTargetType(), model, (gqlGlobType) -> {
+        if (field instanceof GlobArrayField<?> arrayField) {
+            return new GQLGlobSelection(arrayField.getTargetType(), model, (gqlGlobType) -> {
                 this.gqlGlobType = gqlGlobType;
             });
-        } else if (field instanceof GlobField) {
-            return new GQLGlobSelection(((GlobField) field).getTargetType(), model, (gqlGlobType) -> {
+        } else if (field instanceof GlobField<?> globField) {
+            return new GQLGlobSelection(globField.getTargetType(), model, (gqlGlobType) -> {
                 this.gqlGlobType = gqlGlobType;
             });
         }

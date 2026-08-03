@@ -24,11 +24,11 @@ public class Human {
 //    public static BooleanField hasFriend;
 
     @Target(BirthDate.class)
-    public static GlobField birthDate;
+    public static GlobField<BirthDate> birthDate;
 
     @Target(Human.class)
     @GQLQueryParam_(FriendQueryParam.class)
-    public static GlobArrayField friends;
+    public static GlobArrayField<FriendQueryParam> friends;
 
     public static class FriendQueryParam {
         public static GlobType TYPE;

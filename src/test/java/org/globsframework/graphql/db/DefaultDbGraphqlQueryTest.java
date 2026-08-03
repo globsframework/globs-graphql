@@ -129,7 +129,7 @@ public class DefaultDbGraphqlQueryTest {
         public static GlobType TYPE;
 
         @Target(HumainQuery.class)
-        public static GlobField query;
+        public static GlobField<HumainQuery> query;
 
         static {
             GlobTypeBuilder builder = GlobTypeBuilderFactory.create("Schema");
@@ -143,7 +143,7 @@ public class DefaultDbGraphqlQueryTest {
 
         @Target(Connection.class)
         @GQLQueryParam_(Parameter.class)
-        public static GlobField humains;
+        public static GlobField<Parameter> humains;
 
         static {
             GlobTypeBuilder builder = GlobTypeBuilderFactory.create("HumainQuery");
@@ -191,11 +191,11 @@ public class DefaultDbGraphqlQueryTest {
             public static IntegerField totalCount;
 
             @Target(Hedge.class)
-            public static GlobArrayField edges;
+            public static GlobArrayField<Hedge> edges;
 
             @Target(GQLPageInfo.class)
             @GQLMandatory_
-            public static GlobField pageInfo;
+            public static GlobField<GQLPageInfo> pageInfo;
 
             static {
                 GlobTypeBuilder builder = GlobTypeBuilderFactory.create("Connection");
@@ -210,7 +210,7 @@ public class DefaultDbGraphqlQueryTest {
             public static GlobType TYPE;
 
             @Target(Humain.class)
-            public static GlobField node;
+            public static GlobField<Humain> node;
 
             public static StringField cursor;
 

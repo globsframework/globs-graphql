@@ -12,7 +12,7 @@ public class QueryMutation {
 
     @Target(Human.class)
     @GQLQueryParam_(CreateParam.class)
-    public static GlobField createHumain;
+    public static GlobField<Human> createHumain;
 
     static {
         GlobTypeBuilder builder = GlobTypeBuilderFactory.create("Mutation");

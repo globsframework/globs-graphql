@@ -14,10 +14,10 @@ public class HumanConnection {
     public static IntegerField totalCount;
 
     @Target(HumanEdgeConnection.class)
-    public static GlobArrayField edges;
+    public static GlobArrayField<HumanEdgeConnection> edges;
 
     @Target(GQLPageInfo.class)
-    public static GlobField pageInfo;
+    public static GlobField<GQLPageInfo> pageInfo;
 
     static {
         GlobTypeBuilder builder = GlobTypeBuilderFactory.create("HumanConnection");

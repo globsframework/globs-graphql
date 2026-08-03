@@ -10,10 +10,10 @@ public class SchemaType {
     public static GlobType TYPE;
 
     @Target(QueryType.class)
-    public static GlobField query;
+    public static GlobField<QueryType> query;
 
     @Target(QueryMutation.class)
-    public static GlobField mutation;
+    public static GlobField<QueryMutation> mutation;
 
     static {
         GlobTypeBuilder builder = GlobTypeBuilderFactory.create("Schema");

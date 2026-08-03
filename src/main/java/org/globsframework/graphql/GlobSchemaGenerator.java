@@ -102,10 +102,10 @@ public class GlobSchemaGenerator {
 
     private void loopType(GlobType type) {
         for (Field field : type.getFields()) {
-            if (field instanceof GlobField) {
-                add(((GlobField) field).getTargetType());
-            } else if (field instanceof GlobArrayField) {
-                add(((GlobArrayField) field).getTargetType());
+            if (field instanceof GlobField<?> globField) {
+                add(globField.getTargetType());
+            } else if (field instanceof GlobArrayField<?> globArrayField) {
+                add(globArrayField.getTargetType());
             }
             if (field.hasAnnotation(GraphqlEnum.UNIQUE_KEY)) {
                 final Glob annotation = field.getAnnotation(GraphqlEnum.UNIQUE_KEY);
@@ -122,10 +122,10 @@ public class GlobSchemaGenerator {
 
     private void addChildInput(GlobType type) {
         for (Field field : type.getFields()) {
-            if (field instanceof GlobField) {
-                addInput(((GlobField) field).getTargetType());
-            } else if (field instanceof GlobArrayField) {
-                addInput(((GlobArrayField) field).getTargetType());
+            if (field instanceof GlobField<?> globField) {
+                addInput(globField.getTargetType());
+            } else if (field instanceof GlobArrayField<?> globArrayField) {
+                addInput(globArrayField.getTargetType());
             }
             if (field.hasAnnotation(GraphqlEnum.UNIQUE_KEY)) {
                 final Glob annotation = field.getAnnotation(GraphqlEnum.UNIQUE_KEY);
@@ -231,12 +231,12 @@ public class GlobSchemaGenerator {
         }
 
         @Override
-        public void visitGlob(GlobField field) throws Exception {
+        public void visitGlob(GlobField<?> field) throws Exception {
             desc.append(field.getTargetType().getName());
         }
 
         @Override
-        public void visitGlobArray(GlobArrayField field) throws Exception {
+        public void visitGlobArray(GlobArrayField<?> field) throws Exception {
             desc.append("[")
                     .append(field.getTargetType().getName())
                     .append("]");

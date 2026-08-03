@@ -81,7 +81,7 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
         keyExtractors.put(field, from, glindaExtractor);
     }
 
-    public void registerConnection(GlobField globField, GQLGlobConnectionLoad<C> connection, StringField uuid, StringField paramForOrderBy) {
+    public void registerConnection(GlobField<?> globField, GQLGlobConnectionLoad<C> connection, StringField uuid, StringField paramForOrderBy) {
         connections.put(globField, new ConnectionInfo<>(connection, uuid, paramForOrderBy));
     }
 
@@ -204,8 +204,8 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
         }
     }
 
-    public record SourceConnectionInfo(Optional<IntegerField> total, GlobField pageInfo, GlobType edgeType,
-                                       GlobArrayField edges, GlobField node, Optional<StringField> cursor,
+    public record SourceConnectionInfo(Optional<IntegerField> total, GlobField<?> pageInfo, GlobType edgeType,
+                                       GlobArrayField<?> edges, GlobField<?> node, Optional<StringField> cursor,
                                        GlobType sourceDataType, PageInfoField pageInfoField) {
     }
 
@@ -327,10 +327,10 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
             return sourceConnectionInfoMap.computeIfAbsent(connectionType, field ->
             {
                 Optional<IntegerField> total = connectionType.findOptField("totalCount").map(Field::asIntegerField);
-                GlobField pageInfo = connectionType.getField("pageInfo").asGlobField();
-                GlobArrayField edges = connectionType.getField("edges").asGlobArrayField();
+                GlobField<?> pageInfo = connectionType.getField("pageInfo").asGlobField();
+                GlobArrayField<?> edges = connectionType.getField("edges").asGlobArrayField();
                 Optional<StringField> cursor = edges.getTargetType().findOptField("cursor").map(Field::asStringField);
-                GlobField node = edges.getTargetType().getField("node").asGlobField();
+                GlobField<?> node = edges.getTargetType().getField("node").asGlobField();
                 GlobType sourceDataType = node.getTargetType();
                 return new SourceConnectionInfo(total, pageInfo, edges.getTargetType(), edges,
                         node, cursor, sourceDataType, extract(pageInfo.getTargetType()));
@@ -351,11 +351,11 @@ public class GQLGlobCallerBuilder<C extends GQLGlobCaller.GQLContext> {
                 final MutableGlob connectionData = gqlField.gqlGlobType().type.instantiate();
                 final Node connectionNode = node.addChild(outField, gqlField.gqlGlobType(), connectionData);
                 final Optional<IntegerField> total = gqlField.gqlGlobType().outputType.findOptField("totalCount").map(Field::asIntegerField);
-                final Optional<GlobField> pageInfoField = gqlField.gqlGlobType().outputType.findOptField("pageInfo").map(Field::asGlobField);
+                final Optional<GlobField<?>> pageInfoField = gqlField.gqlGlobType().outputType.findOptField("pageInfo").map(Field::asGlobField);
                 final Optional<PageInfoField> pageInfoType = pageInfoField.map(t -> extract(t.getTargetType()));
-                final Optional<GlobArrayField> edgesField = gqlField.gqlGlobType().outputType.findOptField("edges").map(Field::asGlobArrayField);
+                final Optional<GlobArrayField<?>> edgesField = gqlField.gqlGlobType().outputType.findOptField("edges").map(Field::asGlobArrayField);
                 final Optional<GlobType> edgesType = edgesField.map(GlobArrayField::getTargetType);
-                final Optional<GlobField> edgeNode = edgesType.map(t -> t.findField("node")).map(Field::asGlobField);
+                final Optional<GlobField<?>> edgeNode = edgesType.map(t -> t.findField("node")).map(Field::asGlobField);
                 final Optional<StringField> edgeCursor = edgesType.map(t -> t.findField("cursor")).map(Field::asStringField);
                 final Optional<GqlField> pageInfoGQLField = pageInfoField.map(pi -> gqlField.gqlGlobType().aliasToField.get(pi));
 
