@@ -3,7 +3,6 @@ package org.globsframework.graphql.model;
 import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.GlobTypeBuilder;
 import org.globsframework.core.metamodel.GlobTypeBuilderFactory;
-import org.globsframework.core.metamodel.annotations.Target;
 import org.globsframework.core.metamodel.fields.GlobArrayField;
 import org.globsframework.core.metamodel.fields.GlobField;
 import org.globsframework.core.metamodel.fields.IntegerField;
@@ -13,10 +12,8 @@ public class HumanConnection {
 
     public static IntegerField totalCount;
 
-    @Target(HumanEdgeConnection.class)
     public static GlobArrayField<HumanEdgeConnection> edges;
 
-    @Target(GQLPageInfo.class)
     public static GlobField<GQLPageInfo> pageInfo;
 
     static {

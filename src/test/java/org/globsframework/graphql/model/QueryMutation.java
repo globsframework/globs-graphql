@@ -3,15 +3,11 @@ package org.globsframework.graphql.model;
 import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.GlobTypeBuilder;
 import org.globsframework.core.metamodel.GlobTypeBuilderFactory;
-import org.globsframework.core.metamodel.annotations.Target;
 import org.globsframework.core.metamodel.fields.GlobField;
 
 public class QueryMutation {
     public static GlobType TYPE;
 
-
-    @Target(Human.class)
-    @GQLQueryParam_(CreateParam.class)
     public static GlobField<Human> createHumain;
 
     static {

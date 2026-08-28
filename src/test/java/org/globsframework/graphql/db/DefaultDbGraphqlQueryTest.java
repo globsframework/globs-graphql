@@ -3,10 +3,7 @@ package org.globsframework.graphql.db;
 import org.globsframework.core.metamodel.GlobType;
 import org.globsframework.core.metamodel.GlobTypeBuilder;
 import org.globsframework.core.metamodel.GlobTypeBuilderFactory;
-import org.globsframework.core.metamodel.annotations.InitUniqueGlob;
 import org.globsframework.core.metamodel.annotations.KeyField;
-import org.globsframework.core.metamodel.annotations.KeyField_;
-import org.globsframework.core.metamodel.annotations.Target;
 import org.globsframework.core.metamodel.fields.GlobArrayField;
 import org.globsframework.core.metamodel.fields.GlobField;
 import org.globsframework.core.metamodel.fields.IntegerField;
@@ -128,7 +125,6 @@ public class DefaultDbGraphqlQueryTest {
     public static class SchemaType {
         public static GlobType TYPE;
 
-        @Target(HumainQuery.class)
         public static GlobField<HumainQuery> query;
 
         static {
@@ -141,8 +137,6 @@ public class DefaultDbGraphqlQueryTest {
     public static class HumainQuery {
         public static GlobType TYPE;
 
-        @Target(Connection.class)
-        @GQLQueryParam_(Parameter.class)
         public static GlobField<Parameter> humains;
 
         static {
@@ -154,7 +148,6 @@ public class DefaultDbGraphqlQueryTest {
         public static class Parameter {
             public static GlobType TYPE;
 
-            @InitUniqueGlob
             public static Glob EMPTY;
 
             public static IntegerField first;
@@ -190,11 +183,8 @@ public class DefaultDbGraphqlQueryTest {
 
             public static IntegerField totalCount;
 
-            @Target(Hedge.class)
             public static GlobArrayField<Hedge> edges;
 
-            @Target(GQLPageInfo.class)
-            @GQLMandatory_
             public static GlobField<GQLPageInfo> pageInfo;
 
             static {
@@ -209,7 +199,6 @@ public class DefaultDbGraphqlQueryTest {
         public static class Hedge {
             public static GlobType TYPE;
 
-            @Target(Humain.class)
             public static GlobField<Humain> node;
 
             public static StringField cursor;
@@ -227,7 +216,6 @@ public class DefaultDbGraphqlQueryTest {
     public static class Humain {
         public static GlobType TYPE;
 
-        @KeyField_
         public static StringField uuid;
 
         public static StringField firstName;
@@ -246,7 +234,6 @@ public class DefaultDbGraphqlQueryTest {
     public static class DbHumain {
         public static GlobType TYPE;
 
-        @KeyField_
         public static StringField uuid;
 
         public static StringField firstName;

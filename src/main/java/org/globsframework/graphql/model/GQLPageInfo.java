@@ -13,10 +13,8 @@ public class GQLPageInfo {
 
     public static final StringField endCursor;
 
-    @GQLMandatory_
     public static final BooleanField hasNextPage;
 
-    @GQLMandatory_
     public static final BooleanField hasPreviousPage;
 
     static {
