@@ -1,90 +1,131 @@
-# globs-graphql
+# Globs GraphQL
 
-Because data are Glob building a graphql library is simple.
-To use the API a Schema must be defined.
-For exemple :
+A GraphQL execution engine where every value is a [Glob](https://globsframework.org) and every type is a
+`GlobType`. There is no code generation and no `graphql-java`: the schema *is* a tree of `GlobType`s, and the
+response *is* a Glob whose `GlobType` is built at runtime to match the query's selection set.
 
- ```
- public class SchemaType {
+Resolvers are called **once per level, not once per node** — every parent at a level is handed to the loader
+in one list — so the N+1 problem is designed out rather than patched with a data loader.
+
+One distinction to keep in mind throughout: **the GraphQL type is not the data type**. A node in the graph
+holds a source Glob (a DB row, a repository glob — whatever the loader pushed), while the query selects from
+a GraphQL `GlobType` (`Human`, `HumanConnection`, …). The mapping between the two is explicit, though it is
+automatic when the names match.
+
+## Requirements
+
+Java 21, `org.globsframework:globs`, `globs-gson`; `globs-sql` for the database-backed connections.
+
+## Installation
+
+```xml
+<dependency>
+    <groupId>org.globsframework</groupId>
+    <artifactId>globs-graphql</artifactId>
+    <version>5.0.0</version>
+</dependency>
+```
+
+## Declaring the schema
+
+The schema is a `GlobType` with a `query` and a `mutation` field:
+
+```java
+public class SchemaType {
     public static GlobType TYPE;
 
-    @Target(QueryType.class)
-    public static GlobField query;
+    public static GlobField<QueryType> query;
 
-    @Target(QueryMutation.class)
-    public static GlobField mutation;
+    public static GlobField<QueryMutation> mutation;
 
     static {
-        GlobTypeLoaderFactory.create(SchemaType.class).load();
+        GlobTypeBuilder builder = GlobTypeBuilderFactory.create("Schema");
+        query = builder.declareGlobField("query", () -> QueryType.TYPE);
+        mutation = builder.declareGlobField("mutation", () -> QueryMutation.TYPE);
+        TYPE = builder.build();
     }
- }
+}
 ```
 
-the query :
+the query type, each field carrying the `GlobType` of its arguments through `GQLQueryParam`:
 
-```
+```java
 public class QueryType {
     public static GlobType TYPE;
 
-    @GQLQueryParam_(HumanQuery.class)
-    @Target(Human.class)
-    public static GlobField humain;
+    public static GlobField<Human> humain;
 
-    @GQLQueryParam_(HumansQuery.class)
-    @Target(HumanConnection.class)
-    public static GlobField humains;
-...
+    public static GlobField<HumanConnection> humains;
 
+    static {
+        GlobTypeBuilder builder = GlobTypeBuilderFactory.create("Query");
+        humain = builder.declareGlobField("humain", () -> Human.TYPE, GQLQueryParam.create(HumanQuery.TYPE));
+        humains = builder.declareGlobField("humains", () -> HumanConnection.TYPE, GQLQueryParam.create(HumansQuery.TYPE));
+        TYPE = builder.build();
+    }
+}
 ```
 
-The connection must follow the standard for a connection :
+and a connection, which must follow the Relay names — `totalCount`, `edges`, `edges.node`, `edges.cursor`,
+`pageInfo` — because that is how the engine recognizes one:
 
-```
+```java
 public class HumanConnection {
     public static GlobType TYPE;
 
     public static IntegerField totalCount;
 
-    @Target(HumanEdgeConnection.class)
-    public static GlobArrayField edges;
+    public static GlobArrayField<HumanEdgeConnection> edges;
 
-    @Target(GQLPageInfo.class)
-    public static GlobField pageInfo;
+    public static GlobField<GQLPageInfo> pageInfo;
 
     static {
-        GlobTypeLoaderFactory.create(HumanConnection.class, "HumanConnection").load();
+        GlobTypeBuilder builder = GlobTypeBuilderFactory.create("HumanConnection");
+        totalCount = builder.declareIntegerField("totalCount");
+        edges = builder.declareGlobArrayField("edges", () -> HumanEdgeConnection.TYPE);
+        pageInfo = builder.declareGlobField("pageInfo", () -> GQLPageInfo.TYPE);
+        TYPE = builder.build();
     }
 }
 ```
 
-Now we register functor to fetch glob and map field.
-A node in the graph is represented by a glob that is push by the parent in the graph.
-The type of the Glob is not the graphql type (so a field mapping is mandatory)
+Only the fields the query actually selects are filled, so a connection type may leave out what it does not
+offer. `src/test/java/org/globsframework/graphql/model/` holds the full set of reference declarations.
 
-The class
+## Resolvers
 
-```
+Next we register the functions that fetch the globs and map the fields. A node in the graph is a Glob pushed
+by its parent; its type is the *data* type, not the GraphQL one, hence the field mapping.
+
+Everything is registered on a builder:
+
+```java
 GQLGlobCallerBuilder gqlGlobCallerBuilder = new GQLGlobCallerBuilder();
 ```
 
-is there to register the functor like :
+There are four kinds of registration — a **loader** (parents in, children out), a **connection** (a Relay
+page), the **functional-key** pair extractor/fetcher (for an entity reachable from several points in the
+schema), and **field mappings**. Each is keyed on the *schema* field.
 
-```
+A field mapping is one line:
+
+```java
 gqlGlobCallerBuilder.registerSimpleField(Humain.firstName, DbHumain.firstName);
 ```
 
-In fact, if the name is the same, the registerField is automatique.
+and is not even needed when the two names match — the engine falls back to the data type's field of the same
+name, and caches that.
 
-A more complexe mapping :
+A computed mapping:
 
 ```
 gqlGlobCallerBuilder.registerField(Human.BirthDate.day, birthDate.getGlobType(), (source, target) -> target.set(Human.BirthDate.day, source.get(birthDate).getDayOfMonth()));
 ```
 
-It say : for the field Human.BirthDate.day if the GlobType of the node is a of type birthDate.getGlobType()
-than apply the mapping to extract the day from the month.
+It reads: for the field `Human.BirthDate.day`, when the node's GlobType is `birthDate.getGlobType()`, apply
+this mapping to extract the day.
 
-Now to fetch a given Humain
+Now to fetch one Humain:
 
 ```
 gqlGlobCallerBuilder.registerLoader(QueryType.humain, new GQLGlobLoad<>() {
@@ -102,8 +143,8 @@ gqlGlobCallerBuilder.registerLoader(QueryType.humain, new GQLGlobLoad<>() {
 });
 ```
 
-The library group all the parent for a given level, it is why parents is a list: there is not a call for each node but a
-call for each level.
+The engine groups every parent of a level, which is why `parents` is a list: there is one call per level,
+not one per node.
 The humain has a mandatory parameter, we retrieve it, retrieve the associated glob (from the globRepository or from the
 db)
 then the glob is push to each parent.
@@ -240,4 +281,32 @@ Last, it is possible to generate the schema using
         final String s = globSchemaGenerator.generateAll();
 ```
 
-Given to Graphql-java lib, it is possible to expose the schema on the graphql api.
+That SDL can be handed to graphql-java to publish the schema on an introspection endpoint.
+
+## Query variables
+
+Variables arrive as a `Map<String, String>` of **raw JSON literals**, so a string variable carries its own
+quotes: `Map.of("ID", "\"AZE\"")`. A variable with no value is dropped from the arguments and logged at
+warn rather than failing the query.
+
+
+## Building
+
+```bash
+mvn -o package
+mvn -o test
+mvn -o test -Dtest='GQLQueryParserTest#testFragment'
+```
+
+The GraphQL parser is generated from `src/main/resources/Graphql.g4` by the ANTLR plugin.
+`DefaultDbGraphqlQueryTest` runs against an in-memory HSQLDB; nothing else needs an external service.
+
+## License
+
+Apache License 2.0 — see <https://www.apache.org/licenses/LICENSE-2.0.txt>.
+
+## Links
+
+- [Globs Framework](https://globsframework.org)
+- [GitHub repository](https://github.com/globsframework/globs-graphql)
+- [globs-examples](https://github.com/globsframework/globs-examples) — a server exposing REST, OpenAPI and GraphQL over the same types
