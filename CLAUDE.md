@@ -56,7 +56,7 @@ The `db` package closes the loop for SQL sources: `ConnectionBuilder` reads `aft
 
 ## Schema declaration and generation
 
-Types are declared with globs v5 `GlobTypeBuilder` (`GlobTypeBuilderFactory.create(name)` … `build()`) — the old `GlobTypeLoaderFactory`/introspection path was removed in v5. **The README's examples still show the pre-v5 `GlobTypeLoaderFactory` style and are out of date**; follow `src/test/java/org/globsframework/graphql/model/` instead. Those model classes keep the Java annotations (`@Target`, `@GQLQueryParam_`, `@KeyField_`) as documentation, but the effective declaration is the builder call (`builder.declareGlobField("humain", () -> Human.TYPE, GQLQueryParam.create(HumanQuery.TYPE))`).
+Types are declared with globs v5 `GlobTypeBuilder` (`GlobTypeBuilderFactory.create(name)` … `build()`) — the old `GlobTypeLoaderFactory`/introspection path was removed in v5. **The README's examples still show the pre-v5 `GlobTypeLoaderFactory` style and are out of date**; follow `src/test/java/org/globsframework/graphql/model/` instead. The declaration is the builder call: `builder.declareGlobField("humain", () -> Human.TYPE, GQLQueryParam.create(HumanQuery.TYPE))`. Those model classes used to carry the Java annotations (`@Target`, `@GQLQueryParam_`, `@KeyField_`) alongside as documentation; the `@interface` half is gone from every repo and they carry nothing now.
 
 The root schema type has `query` and `mutation` `GlobField`s; `AntlrGQLVisitor` picks the branch from the operation keyword.
 
