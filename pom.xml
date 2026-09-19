@@ -158,22 +158,22 @@
         <dependency>
             <groupId>org.globsframework</groupId>
             <artifactId>globs</artifactId>
-            <version>5.13-SNAPSHOT</version>
+            <version>5.13.0</version>
         </dependency>
         <dependency>
             <groupId>org.globsframework</groupId>
             <artifactId>globs-gson</artifactId>
-            <version>5.4-SNAPSHOT</version>
+            <version>5.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.globsframework</groupId>
             <artifactId>globs-sql</artifactId>
-            <version>5.3-SNAPSHOT</version>
+            <version>5.3.0</version>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
-            <version>4.13.0</version>
+            <version>4.13.2</version>
         </dependency>
         <!--        <dependency>-->
         <!--            <groupId>com.graphql-java</groupId>-->
@@ -190,30 +190,30 @@
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
-            <version>2.7.1</version>
+            <version>2.7.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>2.0.17</version>
+            <version>2.0.18</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j2-impl</artifactId>
-            <version>2.25.3</version>
+            <version>2.26.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.25.3</version>
+            <version>2.26.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.25.3</version>
+            <version>2.26.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
